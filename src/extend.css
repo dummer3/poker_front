@@ -1,0 +1,98 @@
+.white {
+    color: white;
+}
+
+.black {
+    color: black;
+}
+
+.bg-black {
+    background-color: black;
+}
+
+.bg-grey {
+    background-color: #CDCDCD;
+}
+
+.row {
+    display: flex;
+    justify-content: space-around;
+}
+
+.col-8 {
+    margin-left: 2%;
+    width: 64%;
+}
+
+.board {
+    background-color: rgb(8, 86, 8);
+    border-radius: 20%;
+    width: 80vw;
+    height: 75vh;
+}
+
+.stackem div {
+    width: 100%;
+}
+
+.player {
+    position: relative;
+    width: 10%;
+    height: 15%;
+    z-index: 2;
+}
+
+.card {
+    width: 50%;
+    z-index: -1;
+    margin-bottom: -5%;
+}
+
+.w-33 {
+    width: 33%;
+}
+
+.w-66 {
+    width: 66%
+}
+
+.inline-layered {
+    display: inline-grid;
+}
+
+.inline-layered>* {
+    grid-column-start: 1;
+    grid-row-start: 1;
+}
+
+.Black-token {
+    /* Nothing Right Now */
+}
+
+.Blue-token {
+    filter: hue-rotate(250deg) saturate(7500%)
+}
+
+.Green-token {
+    filter: hue-rotate(125deg) saturate(7500%)
+}
+
+.Red-token {
+    filter: hue-rotate(0deg) saturate(7500%)
+}
+
+.White-token {
+    filter: brightness(500%);
+}
+
+.Hero {
+    position: relative;
+    width: 25%;
+    height: 25%;
+    z-index: 2;
+}
+
+.vilain {
+    width: 100%;
+    height: 60%;
+}
