@@ -6,6 +6,14 @@
     color: black;
 }
 
+.red {
+    color: rgb(180, 13, 13);
+}
+
+.grey {
+    color: #383838
+}
+
 .bg-black {
     background-color: black;
 }
@@ -25,27 +33,14 @@
 }
 
 .board {
-    background-color: rgb(8, 86, 8);
+    background-color: #039a2dcc;
     border-radius: 20%;
-    width: 80vw;
-    height: 75vh;
+    width: 90vw;
+    height: 70vh;
 }
 
 .stackem div {
     width: 100%;
-}
-
-.player {
-    position: relative;
-    width: 10%;
-    height: 15%;
-    z-index: 2;
-}
-
-.card {
-    width: 50%;
-    z-index: -1;
-    margin-bottom: -5%;
 }
 
 .w-33 {
@@ -65,34 +60,73 @@
     grid-row-start: 1;
 }
 
-.Black-token {
+.black-token {
     /* Nothing Right Now */
 }
 
-.Blue-token {
+.blue-token {
     filter: hue-rotate(250deg) saturate(7500%)
 }
 
-.Green-token {
+.green-token {
     filter: hue-rotate(125deg) saturate(7500%)
 }
 
-.Red-token {
-    filter: hue-rotate(0deg) saturate(7500%)
+.red-token {
+    filter: hue-rotate(45deg) saturate(7500%)
 }
 
-.White-token {
+.white-token {
     filter: brightness(500%);
+}
+
+.grey-img {
+    filter: saturate(213%) brightness(50%) contrast(80%);
+}
+
+.red-img {
+    filter: hue-rotate(180deg) saturate(2000%)
+}
+
+.black-img {
+    /* Nothing Right Now */
+}
+
+.player {
+    position: relative;
+    width: 15%;
+    height: 20%;
+    z-index: 2;
+}
+
+.Hero>div {
+    position: relative;
+    width: 25%;
+    height: 75%;
+    z-index: 2;
 }
 
 .Hero {
     position: relative;
-    width: 25%;
-    height: 25%;
+    width: 90%;
+    height: 40%;
     z-index: 2;
 }
 
-.vilain {
-    width: 100%;
+.villain {
+    width: 90%;
     height: 60%;
+}
+
+.card {
+    width: 45%;
+    z-index: -1;
+    margin-bottom: -5%;
+}
+
+.dealer-btn {
+    position: relative;
+    width: 50px;
+    margin-left: 85%;
+    margin-top: -25%;
 }

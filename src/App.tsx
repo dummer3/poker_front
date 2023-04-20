@@ -12,7 +12,7 @@ function App() {
   return (
     <div className="App">
       <Header title="Quizz" />
-      <Quizz />
+      <Quizz position={3} />
     </div>
   );
 }
