@@ -75,7 +75,7 @@ const chips = [
 
 const ChipStack = (stack, stack_index: number) => {
     return (Array.from({ length: stack.value }, (_, index) => {
-        return <img src={chip_img} width="30px" className={stack.color + "-token"} key={`stack-${stack_index}-${index}`} style={{
+        return <img src={chip_img} width="30px" className={stack.color + "-token"} key={`stack-${stack_index}-${index}`} alt={`${stack.color}-token`} style={{
             position: 'relative',
             left: stack_index * 30 + 'px',
             top: -index * 3 + 'px',
@@ -145,7 +145,7 @@ const Crop = (deck, key, initialW, initialH, value, suit, info) => {
             const context = canvas.getContext('2d');
             context.drawImage(deck, value * 92, suit * 134, initialW, initialH, 0, 0, 92, 134);
         }
-    }, [isLoaded]);
+    });
 
     return (
         <canvas className={`card ${info.color}-img`} ref={canvasRef} width={92} height={info.cut} key={key} />
@@ -157,10 +157,10 @@ const Player = (card, x, y, position, action: ACTION) => {
     const key = `[${x},${y}]}`
     const chips = Math.floor(Math.random() * 300)
     let dealer;
-    const info = ActionInf.find(x => x.action == action);
+    const info = ActionInf.find(x => x.action === action);
 
     if (position === 3) {
-        dealer = <img src={dealer_img} className="dealer-btn" ></img>
+        dealer = <img src={dealer_img} className="dealer-btn" alt='dealer-btn' ></img>
     }
 
     return (
@@ -208,14 +208,14 @@ export const Quizz = ({ position }) => {
     useEffect(() => {
         deck.src = deck_img;
         verso.src = verso_img
-    }, [])
+    })
 
 
     const chips = Math.floor(Math.random() * 300)
     let dealer;
 
     if (position === 3) {
-        dealer = <img src={dealer_img} className="dealer-btn" width="40px" ></img>
+        dealer = <img src={dealer_img} alt="dealer-btn" className="dealer-btn" width="40px" ></img>
     }
 
     return (
