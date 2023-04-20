@@ -1,8 +1,9 @@
 import { useRef, useEffect, useState, useMemo } from 'react'
 import deck_img from "../img/poker-deck.webp"
-import chip_img from "../img/chip.webp"
 import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
+
+import { ValueWithChip } from './Chip'
 
 const VALUE =
 {
@@ -63,52 +64,6 @@ const PlacePlayer = (number) => {
         })
     }
     return players
-}
-
-const chips = [
-    { color: "black", value: 100 },
-    { color: "green", value: 25 },
-    { color: "blue", value: 10 },
-    { color: "red", value: 5 },
-    { color: "white", value: 1 }
-]
-
-const ChipStack = (stack, stack_index: number) => {
-    return (Array.from({ length: stack.value }, (_, index) => {
-        return <img src={chip_img} width="30px" className={stack.color + "-token"} key={`stack-${stack_index}-${index}`} alt={`${stack.color}-token`} style={{
-            position: 'relative',
-            left: stack_index * 30 + 'px',
-            top: -index * 3 + 'px',
-        }}></img>
-    }))
-}
-
-const ValueWithChip = (number: number) => {
-    let index = 0;
-    let currentChip = [
-        { color: "black", value: 0 },
-        { color: "green", value: 0 },
-        { color: "blue", value: 0 },
-        { color: "red", value: 0 },
-        { color: "white", value: 0 }
-    ];
-
-    while (number > 0) {
-        while (chips[index].value > number) {
-            index++;
-        }
-
-        currentChip[index].value++;
-        number -= chips[index].value;
-    }
-
-    const length = currentChip.filter(x => x.value !== 0).length - 1;
-
-    let dist = -length * 30;
-    return (
-        <div className='value-bet inline-layered col' style={{ marginLeft: dist + 'px' }}>
-            {currentChip.filter(x => x.value !== 0).map((stack, stack_index) => { return ChipStack(stack, stack_index) })}
-        </div>);
 }
 
 const ActionInf =
