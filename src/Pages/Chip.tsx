@@ -1,5 +1,7 @@
 import chip_img from "../img/chip.webp"
 
+const chipSize = 25
+
 const chipsValue = [
     { color: "black", value: 100 },
     { color: "green", value: 25 },
@@ -33,10 +35,10 @@ export const BreakDownToChip = (value: number) => {
 
 const ChipStack = (stack, stack_index: number) => {
     return (Array.from({ length: stack.value }, (_, index) => {
-        return <img src={chip_img} width="30px" className={stack.color + "-token"} key={`stack-${stack_index}-${index}`} alt={`${stack.color}-token`} style={{
+        return <img src={chip_img} width={`${chipSize}px`} className={stack.color + "-token"} key={`stack-${stack_index}-${index}`} alt={`${stack.color}-token`} style={{
             position: 'relative',
-            left: stack_index * 30 + 'px',
-            top: -index * 3 + 'px',
+            left: stack_index * chipSize + 'px',
+            top: -index * chipSize / 10 + 'px',
         }}></img>
     }))
 }
@@ -48,7 +50,7 @@ export const ValueWithChip = (number: number) => {
 
     const length = chips.length - 1;
 
-    let dist = -length * 30;
+    let dist = -length * chipSize;
 
     return (
         <div className='value-bet inline-layered col' style={{ marginLeft: dist + 'px' }}>
