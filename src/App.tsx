@@ -8,11 +8,13 @@ import { Header } from './Pages/Header.js'
 import { Quizz } from './Pages/Quizz';
 
 function App() {
+
   return (
     <div className="App">
       <Header title="Quizz" />
-      <Quizz position={3} />
+      <Quizz position={0} />
     </div>
+
   );
 }
 

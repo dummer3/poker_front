@@ -22,6 +22,30 @@
     background-color: #CDCDCD;
 }
 
+.bg-red {
+    background-color: rgb(191, 0, 0) !important;
+}
+
+.bg-blue {
+    background-color: #000abe !important;
+}
+
+.bg-teal {
+    background-color: rgb(0, 199, 179) !important;
+}
+
+.bg-magenta {
+    background-color: #ac0098 !important;
+}
+
+.bg-yellow {
+    background-color: rgb(202, 196, 2) !important;
+}
+
+.bg-green {
+    background-color: #228900 !important;
+}
+
 .row {
     display: flex;
     justify-content: space-around;
@@ -126,7 +150,5 @@
 
 .dealer-btn {
     position: relative;
-    width: 50px;
-    margin-left: 85%;
-    margin-top: -25%;
+    width: 40px;
 }

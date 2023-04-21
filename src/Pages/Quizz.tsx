@@ -41,36 +41,55 @@ const POSITION =
 
 enum ACTION {
     FOLD = "FOLD",
+    "CALL/FOLD" = "CALL/FOLD",
     CALL = "CALL",
+    "RAISE/CALL" = "RAISE/CALL",
     RAISE = "RAISE",
+    "RAISE/FOLD" = "RAISE/FOLD"
 }
+
+const ActionColor: { color: string, action: ACTION }[] =
+    [
+        { color: "red", action: ACTION.FOLD },
+        { color: "magenta", action: ACTION['CALL/FOLD'] },
+        { color: "blue", action: ACTION.CALL },
+        { color: "teal", action: ACTION['RAISE/CALL'] },
+        { color: "green", action: ACTION.RAISE },
+        { color: "yellow", action: ACTION['RAISE/FOLD'] },
+    ]
+
 let Actions = (Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x) > 0)).map((action) => {
     return (
-        <button key={action} className='btn btn-primary btn-lg active'
+        <button key={action} className={`btn btn-primary bg-${ActionColor.find(x => x.action === action).color} btn-lg active`}
             onClick={(e) => { console.log(action) }}> {action} </button>);
 });
 
 
-const PlacePlayer = (number) => {
-    let players = [];
-    let angle = 180 / (number - 1) * (Math.PI / 180)
-
-    for (let i = 0; i < number; i++) {
-        let x = (Math.cos(angle * i) + 1) * 50 - 7.5,
-            y = (1 - Math.sin(angle * i)) * 60;
-        players.unshift({
-            x: x + "%",
-            y: y + "%"
-        })
-    }
+const PlacePlayer = () => {
+    let players = [
+        { "x": -7, "y": 80 },
+        { "x": 3, "y": 10 },
+        { "x": 43, "y": -10 },
+        { "x": 83, "y": 10 },
+        { "x": 93, "y": 80 },
+    ];
     return players
 }
 
+const PlaceDealerBtn = [
+    { "top": "-50%", "left": "70%" },
+    { "top": "-30%", "left": "70%" },
+    { "top": "-30%", "left": "70%" },
+    { "top": "-30%", "left": "-70%" },
+    { "top": "-50%", "left": "-70%" },
+    { "top": "-120%", "left": "60%" },
+]
+
 const ActionInf =
     [
-        { "action": ACTION.FOLD, "cut": 40, "color": "grey" },
-        { "action": ACTION.CALL, "cut": 80, "color": "black" },
-        { "action": ACTION.RAISE, "cut": 80, "color": "red" }
+        { "action": ACTION.FOLD, "cut": 25, "color": "grey", "print": "FOLD" },
+        { "action": ACTION.CALL, "cut": 80, "color": "red", "print": <b>CALL</b> },
+        { "action": ACTION.RAISE, "cut": 80, "color": "red", "print": <b>RAISE</b> }
     ]
 
 const Crop = (deck, key, initialW, initialH, value, suit, info) => {
@@ -107,7 +126,7 @@ const Crop = (deck, key, initialW, initialH, value, suit, info) => {
     );
 };
 
-const Player = (card, x, y, position, action: ACTION) => {
+const Player = (card, x, y, position, action: ACTION, index: number) => {
 
     const key = `[${x},${y}]}`
     const chips = Math.floor(Math.random() * 300)
@@ -115,7 +134,8 @@ const Player = (card, x, y, position, action: ACTION) => {
     const info = ActionInf.find(x => x.action === action);
 
     if (position === 3) {
-        dealer = <img src={dealer_img} className="dealer-btn" alt='dealer-btn' ></img>
+        dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn"
+            style={PlaceDealerBtn[index]} />
     }
 
     return (
@@ -138,21 +158,21 @@ const Player = (card, x, y, position, action: ACTION) => {
                         <div> {Math.floor(Math.random() * 1000) + '$'}</div>
                     </div>
                     <div className={`col my-auto bg-grey black w-33 mx-1 p-0 ${info.color}`}>
-                        {action}
+                        {info.print}
                     </div>
                 </div>
             </div>
-            {dealer}
-            <div className='d-flex white justify-content-center flex-column  align-items-center'>
+            <div className='d-flex white justify-content-center flex-column align-items-center'>
                 <h3 className=''>{chips}</h3>
                 {ValueWithChip(chips)}
             </div>
+            {dealer}
         </div>);
 }
 
 const randomEnumValue = (enumeration) => {
     const values = Object.keys(enumeration);
-    const enumKey = values[Math.floor(Math.random() * values.length)];
+    const enumKey = values[2];
     return enumeration[enumKey];
 }
 
@@ -170,16 +190,18 @@ export const Quizz = ({ position }) => {
     let dealer;
 
     if (position === 3) {
-        dealer = <img src={dealer_img} alt="dealer-btn" className="dealer-btn" width="40px" ></img>
+        dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn"
+            style={PlaceDealerBtn[5]} />
     }
+
 
     return (
         <div className="quizz d-flex flex-column">
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
-                    {PlacePlayer(5).map(
+                    {PlacePlayer().map(
                         ({ x, y }, index) => {
-                            return Player(verso, x, y, (position + index + 1) % 6, randomEnumValue(ACTION))
+                            return Player(verso, `${x}%`, `${y}%`, (position + index + 1) % 6, randomEnumValue(ACTION), index)
                         }
                     )}
                 </div>
