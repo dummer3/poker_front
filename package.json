@@ -17,8 +17,6 @@
         "bootstrap": "^5.2.3",
         "browserify-zlib": "^0.2.0",
         "buffer": "^6.0.3",
-        "google-spreadsheet": "^3.3.0",
-        "googleapis": "^118.0.0",
         "https": "^1.0.0",
         "https-proxy-agent": "^5.0.1",
         "node-polyfill-webpack-plugin": "^2.0.1",
