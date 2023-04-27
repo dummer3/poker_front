@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 env:
-  ENV: secret.ENV_FILE
+  ENV: "${{ secrets.ENV_FILE }}" 
   
 jobs:
   build:
