@@ -18,7 +18,7 @@ const gapiLoaded = async () => {
 
 const initializeGapiClient = async () => {
     await gapi.client.init({
-        apiKey: process.env.API_KEY,
+        apiKey: process.env.REACT_APP_API_KEY,
         discoveryDocs: [DISCOVERY_DOC],
     });
     gapiInited = true;
@@ -27,8 +27,9 @@ const initializeGapiClient = async () => {
 }
 
 const gisLoaded = () => {
+    console.log(process.env.REACT_APP_CLIENT_ID);
     tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: process.env.CLIENT_ID,
+        client_id: process.env.REACT_APP_CLIENT_ID,
         scope: SCOPES,
         callback: '', // defined later
     });
@@ -60,7 +61,7 @@ const listMajors = () => {
 
     console.log(gapi);
     gapi.client.script.scripts.run({
-        'scriptId': process.env.API_ID,
+        'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getQuizz',
             "parameters": [

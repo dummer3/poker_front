@@ -19,7 +19,7 @@ const gapiLoaded = async () => {
 
 const initializeGapiClient = async () => {
     await gapi.client.init({
-        apiKey: process.env.API_KEY,
+        apiKey: process.env.REACT_APP_API_KEY,
         discoveryDocs: [DISCOVERY_DOC],
     });
     gapiInited = true;
@@ -29,7 +29,7 @@ const initializeGapiClient = async () => {
 
 const gisLoaded = () => {
     tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: process.env.CLIENT_ID,
+        client_id: process.env.REACT_APP_CLIENT_ID,
         scope: SCOPES,
         callback: '', // defined later
     });
@@ -59,7 +59,7 @@ function allLoad() {
 
 const test = () => {
     gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: process.env.SHEET_ID,
+        spreadsheetId: process.env.REACT_APP_SHEET_ID,
         range: 'Ranges for Quiz!G4:I172',
     }).then((response) => {
         const range = response.result;
