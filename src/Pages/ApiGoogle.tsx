@@ -86,7 +86,7 @@ const listMajors = () => {
             }
         } else {
             const quizz = result.response.result;
-            console.log(result)
+            console.log(quizz)
         }
     });
 }
