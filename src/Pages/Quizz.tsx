@@ -4,7 +4,7 @@ import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
-import { QuestionContext } from '../context/QuizzContext'
+import { QuestionsContext } from '../context/QuizzContext'
 import { Question_t } from '../types/type'
 import { Header } from './Header'
 
@@ -85,22 +85,22 @@ const ActionInfChoice: { color: string, action: string, abreviation: string }[] 
         { color: "yellow", action: 'RAISE/FOLD', abreviation: 'RF' },
     ]
 
-let ActiontoButton = (actions, question: Question_t, setScore, setQuestion, score: number, nbrQuestion: number) => (Object.keys(actions) as Array<keyof typeof actions>).filter(x => !(parseInt(x.toString()) > 0)).map((action) => {
+let ActiontoButton = (actions, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => (Object.keys(actions) as Array<keyof typeof actions>).filter(x => !(parseInt(x.toString()) > 0)).map((action) => {
     return (
-        <button key={action.toString()} className={`btn btn-primary bg-${ActionInfChoice.find(x => x.action === action).color} btn-lg active col mx-3 my-1 ${question[ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "disabled" : ""}`}
-            onClick={(e) => { testAnswer(action, question, setScore, setQuestion, score, nbrQuestion) }}> {action.toString()} </button>);
+        <button key={action.toString()} className={`btn btn-primary bg-${ActionInfChoice.find(x => x.action === action).color} btn-lg active col mx-3 my-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "disabled" : ""}`}
+            onClick={(e) => { testAnswer(action, questions, setScore, setQuestion, score, nbrQuestion) }}> {action.toString()} </button>);
 
 });
 
-const testAnswer = (action, question: Question_t, setScore, setQuestion, score: number, nbrQuestion: number) => {
+const testAnswer = (action, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => {
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
-    console.log(question);
-    if (abr === question.Action) {
-        setScore(score + question[abr]);
+    console.log(questions);
+    if (abr === questions[nbrQuestion].Action) {
+        setScore(score + questions[nbrQuestion][abr]);
         console.log("CORRECT ANSWER");
     }
     else {
-        setScore(score - question[abr]);
+        setScore(score - questions[nbrQuestion][abr]);
         console.log("WRONG ANSWER");
     }
     setQuestion(nbrQuestion + 1);
@@ -221,10 +221,8 @@ const Player = (card, x, y, position, index: number) => {
 
 export const Quizz = ({ position }) => {
 
-
-
-    const [question] = useContext(QuestionContext);
-    const [nbrQuestion, setNbrQuestion] = useState(1);
+    const [questions] = useContext(QuestionsContext);
+    const [nbrQuestion, setNbrQuestion] = useState(0);
     const [score, setScore] = useState(0);
     const [heroCard, setHeroCard] = useState({ sr: SUIT.CLUB, sl: 0, vr: VALUE.Q, vl: 0 });
 
@@ -245,8 +243,8 @@ export const Quizz = ({ position }) => {
     }
 
     useEffect(() => {
-        setHeroCard(strToHand(question?.hand));
-    }, [question]);
+        setHeroCard(strToHand(questions[nbrQuestion].hand));
+    }, [nbrQuestion, questions]);
 
     card = [Crop(deck, "hero__1", 92, 134, heroCard.vl,
         heroCard.sl, { color: "black", cut: 110 }),
@@ -256,7 +254,7 @@ export const Quizz = ({ position }) => {
 
     return (
         <div className="quizz d-flex flex-column">
-            <Header title={`Score: ${score}`} leftText="3-bet" leftSub="UTG" rightText={`Question n°${nbrQuestion}/10`} />
+            <Header title={`Score: ${score}`} leftText="3-bet" leftSub="UTG" rightText={`Question n°${nbrQuestion + 1}/10`} />
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
                     {PlacePlayer().map(
@@ -267,7 +265,6 @@ export const Quizz = ({ position }) => {
                 </div>
                 <div className='Hero mx-auto'>
                     <div className="mx-auto">
-
                         <div className='d-flex white justify-content-center flex-column  align-items-center'>
                             <h3 className=''>{chips}</h3>
                             {ValueWithChip(chips)}
@@ -293,10 +290,10 @@ export const Quizz = ({ position }) => {
             </div>
             <div className='Answer grid justify-content-around mt-3 mx-5'>
                 <div className='row'>
-                    {ActiontoButton(ACTION, question, setScore, setNbrQuestion, score, nbrQuestion)}
+                    {ActiontoButton(ACTION, questions, setScore, setNbrQuestion, score, nbrQuestion)}
                 </div>
                 <div className='row'>
-                    {ActiontoButton(MULTIPLE_ACTION, question, setScore, setNbrQuestion, score, nbrQuestion)}
+                    {ActiontoButton(MULTIPLE_ACTION, questions, setScore, setNbrQuestion, score, nbrQuestion)}
                 </div>
             </div>
         </div>
