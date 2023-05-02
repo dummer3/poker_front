@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
     const navigate = useNavigate();
-    const [questions, setQuestions] = useContext(QuestionsContext);
+    // eslint-disable-next-line 
+    const [_, setQuestions] = useContext(QuestionsContext);
     return (
         <div className="Home">
             <button className='btn-primary ' onClick={() => API.FinishLoad()}> LOAD </button >
