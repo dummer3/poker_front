@@ -1,32 +1,56 @@
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useState, useMemo, useContext } from 'react'
 import deck_img from "../img/poker-deck.webp"
 import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
+import { QuestionContext } from '../context/QuizzContext'
+import { Question_t } from '../types/type'
+import { Header } from './Header'
 
-const VALUE =
-{
-    2: 1,
-    3: 2,
-    4: 3,
-    5: 4,
-    6: 5,
-    7: 6,
-    8: 7,
-    9: 8,
-    10: 9,
-    JACK: 10,
-    QUEEN: 11,
-    KING: 12,
-    ACE: 0
+
+const randomEnumValue = (enumeration) => {
+    // FILTER BECAUSE KEY => VALUE AND VALUE => KEY IS THE SAME FOR JS
+    const values = Object.keys(enumeration).filter(x => !(parseInt(x.toString()) >= 0));
+    const enumKey = values[Math.floor(Math.random() * values.length)];
+    return enumeration[enumKey];
 }
-const SUIT =
-{
-    CLUB: 0,
-    DIAMOND: 1,
-    HEART: 2,
-    SPADES: 3
+
+enum VALUE {
+    _2 = 1,
+    _3 = 2,
+    _4 = 3,
+    _5 = 4,
+    _6 = 5,
+    _7 = 6,
+    _8 = 7,
+    _9 = 8,
+    T = 9,
+    J = 10,
+    Q = 11,
+    K = 12,
+    A = 0
+}
+enum SUIT {
+    CLUB = 0,
+    DIAMOND = 1,
+    HEART = 2,
+    SPADES = 3
+}
+
+function isNumber(char) {
+    return /^\d$/.test(char);
+}
+
+const strToHand = (str: string): { vl: VALUE; sl: number; vr: VALUE; sr: number } => {
+    const sl: SUIT = randomEnumValue(SUIT);
+    let sr: SUIT;
+    if (str[2] === 's') { sr = sl }
+    else { do { sr = randomEnumValue(SUIT) } while (sr === sl); }
+
+    const vl: VALUE = isNumber(str[0]) ? VALUE["_" + str[0]] : VALUE[str[0]];
+    const vr: VALUE = isNumber(str[1]) ? VALUE["_" + str[1]] : VALUE[str[1]];
+    return { vl: vl, sl: sl, vr: vr, sr: sr };
 }
 
 const POSITION =
@@ -41,29 +65,46 @@ const POSITION =
 
 enum ACTION {
     FOLD = "FOLD",
-    "CALL/FOLD" = "CALL/FOLD",
     CALL = "CALL",
-    "RAISE/CALL" = "RAISE/CALL",
     RAISE = "RAISE",
+}
+enum MULTIPLE_ACTION {
+
+    "CALL/FOLD" = "CALL/FOLD",
+    "RAISE/CALL" = "RAISE/CALL",
     "RAISE/FOLD" = "RAISE/FOLD"
 }
 
-const ActionColor: { color: string, action: ACTION }[] =
+const ActionInfChoice: { color: string, action: string, abreviation: string }[] =
     [
-        { color: "red", action: ACTION.FOLD },
-        { color: "magenta", action: ACTION['CALL/FOLD'] },
-        { color: "blue", action: ACTION.CALL },
-        { color: "teal", action: ACTION['RAISE/CALL'] },
-        { color: "green", action: ACTION.RAISE },
-        { color: "yellow", action: ACTION['RAISE/FOLD'] },
+        { color: "red", action: 'FOLD', abreviation: 'F' },
+        { color: "magenta", action: 'CALL/FOLD', abreviation: 'CF' },
+        { color: "blue", action: 'CALL', abreviation: 'C' },
+        { color: "teal", action: 'RAISE/CALL', abreviation: 'RC' },
+        { color: "green", action: 'RAISE', abreviation: 'R' },
+        { color: "yellow", action: 'RAISE/FOLD', abreviation: 'RF' },
     ]
 
-let Actions = (Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x) > 0)).map((action) => {
+let ActiontoButton = (actions, question: Question_t, setScore, setQuestion, score: number, nbrQuestion: number) => (Object.keys(actions) as Array<keyof typeof actions>).filter(x => !(parseInt(x.toString()) > 0)).map((action) => {
     return (
-        <button key={action} className={`btn btn-primary bg-${ActionColor.find(x => x.action === action).color} btn-lg active`}
-            onClick={(e) => { console.log(action) }}> {action} </button>);
+        <button key={action.toString()} className={`btn btn-primary bg-${ActionInfChoice.find(x => x.action === action).color} btn-lg active col mx-3 my-1 ${question[ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "disabled" : ""}`}
+            onClick={(e) => { testAnswer(action, question, setScore, setQuestion, score, nbrQuestion) }}> {action.toString()} </button>);
+
 });
 
+const testAnswer = (action, question: Question_t, setScore, setQuestion, score: number, nbrQuestion: number) => {
+    const abr = ActionInfChoice.find(x => x.action === action).abreviation;
+    console.log(question);
+    if (abr === question.Action) {
+        setScore(score + question[abr]);
+        console.log("CORRECT ANSWER");
+    }
+    else {
+        setScore(score - question[abr]);
+        console.log("WRONG ANSWER");
+    }
+    setQuestion(nbrQuestion + 1);
+}
 
 const PlacePlayer = () => {
     let players = [
@@ -92,10 +133,9 @@ const ActionInf =
         { "action": ACTION.RAISE, "cut": 80, "color": "red", "print": <b>RAISE</b> }
     ]
 
-const Crop = (deck, key, initialW, initialH, value, suit, info) => {
+const Crop = (deck, key, initialW, initialH, value: number, suit: number, info) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const canvasRef = useRef(null);
-
 
     useEffect(() => {
         const onLoad = () => {
@@ -111,7 +151,7 @@ const Crop = (deck, key, initialW, initialH, value, suit, info) => {
         return () => {
             deck.removeEventListener('load', onLoad);
         };
-    }, [deck, isLoaded]);
+    }, [deck, isLoaded, value, suit]);
 
     useEffect(() => {
         if (isLoaded && canvasRef.current) {
@@ -126,10 +166,19 @@ const Crop = (deck, key, initialW, initialH, value, suit, info) => {
     );
 };
 
-const Player = (card, x, y, position, action: ACTION, index: number) => {
+const Player = (card, x, y, position, index: number) => {
+
+    const [chips, setChips] = useState(0);
+    const [action, setAction] = useState(ACTION.FOLD);
 
     const key = `[${x},${y}]}`
-    const chips = Math.floor(Math.random() * 300)
+
+    // eslint-disable-next-line
+    useEffect(() => {
+        setChips(Math.floor(Math.random() * 300))
+        setAction(randomEnumValue(ACTION));
+    }, []);
+
     let dealer;
     const info = ActionInf.find(x => x.action === action);
 
@@ -170,14 +219,15 @@ const Player = (card, x, y, position, action: ACTION, index: number) => {
         </div>);
 }
 
-const randomEnumValue = (enumeration) => {
-    const values = Object.keys(enumeration);
-    const enumKey = values[2];
-    return enumeration[enumKey];
-}
-
-
 export const Quizz = ({ position }) => {
+
+
+
+    const [question] = useContext(QuestionContext);
+    const [nbrQuestion, setNbrQuestion] = useState(1);
+    const [score, setScore] = useState(0);
+    const [heroCard, setHeroCard] = useState({ sr: SUIT.CLUB, sl: 0, vr: VALUE.Q, vl: 0 });
+
     const deck = useMemo(() => new Image(), []);
     const verso = useMemo(() => new Image(), []);
     useEffect(() => {
@@ -185,8 +235,8 @@ export const Quizz = ({ position }) => {
         verso.src = verso_img
     })
 
-
     const chips = Math.floor(Math.random() * 300)
+    let card = [];
     let dealer;
 
     if (position === 3) {
@@ -194,14 +244,24 @@ export const Quizz = ({ position }) => {
             style={PlaceDealerBtn[5]} />
     }
 
+    useEffect(() => {
+        setHeroCard(strToHand(question?.hand));
+    }, [question]);
+
+    card = [Crop(deck, "hero__1", 92, 134, heroCard.vl,
+        heroCard.sl, { color: "black", cut: 110 }),
+    Crop(deck, "hero__2", 92, 134, heroCard.vr,
+        heroCard.sr, { color: "black", cut: 110 }
+    )]
 
     return (
         <div className="quizz d-flex flex-column">
+            <Header title={`Score: ${score}`} leftText="3-bet" leftSub="UTG" rightText={`Question n°${nbrQuestion}/10`} />
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
                     {PlacePlayer().map(
                         ({ x, y }, index) => {
-                            return Player(verso, `${x}%`, `${y}%`, (position + index + 1) % 6, randomEnumValue(ACTION), index)
+                            return Player(verso, `${x}%`, `${y}%`, (position + index + 1) % 6, index)
                         }
                     )}
                 </div>
@@ -213,11 +273,8 @@ export const Quizz = ({ position }) => {
                             {ValueWithChip(chips)}
                         </div>
                         <div className="hold-cards d-flex mx-auto mt-2 justify-content-center">
-                            {Crop(deck, "hero__1", 92, 134, Math.floor(Math.random() * Object.keys(VALUE).length),
-                                Math.floor(Math.random() * Object.keys(SUIT).length), { color: "black", cut: 110 })}
-                            {Crop(deck, "hero__2", 92, 134, Math.floor(Math.random() * Object.keys(VALUE).length),
-                                Math.floor(Math.random() * Object.keys(SUIT).length), { color: "black", cut: 110 }
-                            )}
+                            {card[0]}
+                            {card[1]}
                         </div>
                         <div className='container Information bg-black white p-auto'>
                             <div className="row">
@@ -234,8 +291,13 @@ export const Quizz = ({ position }) => {
                 </div>
 
             </div>
-            <div className='Answer d-flex justify-content-around mt-5 '>
-                {Actions}
+            <div className='Answer grid justify-content-around mt-3 mx-5'>
+                <div className='row'>
+                    {ActiontoButton(ACTION, question, setScore, setNbrQuestion, score, nbrQuestion)}
+                </div>
+                <div className='row'>
+                    {ActiontoButton(MULTIPLE_ACTION, question, setScore, setNbrQuestion, score, nbrQuestion)}
+                </div>
             </div>
         </div>
 

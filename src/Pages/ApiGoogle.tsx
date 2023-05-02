@@ -1,17 +1,15 @@
-import { useEffect } from 'react';;
+import { useEffect } from 'react';
+import { Question_t } from '../types/type';
 
 declare var google: any
 declare var gapi: any
-
 
 const DISCOVERY_DOC = 'https://script.googleapis.com/$discovery/rest?version=v1';
 const SCOPES = 'https://www.googleapis.com/auth/script.projects';
 
 let tokenClient;
-let gapiInited = false;
-let gisInited = false;
 
-
+// Init the oAuth connection with our poker project
 const gapiLoaded = async () => {
     gapi.load('client', initializeGapiClient);
 }
@@ -21,46 +19,61 @@ const initializeGapiClient = async () => {
         apiKey: process.env.REACT_APP_API_KEY,
         discoveryDocs: [DISCOVERY_DOC],
     });
-    gapiInited = true;
-    maybeEnableButtons();
-
 }
 
+// Create the token to allow call 
 const gisLoaded = () => {
-    console.log(process.env.REACT_APP_CLIENT_ID);
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: process.env.REACT_APP_CLIENT_ID,
         scope: SCOPES,
         callback: '', // defined later
     });
-    gisInited = true;
-    maybeEnableButtons();
 }
 
-function maybeEnableButtons() {
-    if (gapiInited && gisInited) {
-        tokenClient.callback = async (resp) => {
-            if (resp.error !== undefined) {
-                throw (resp);
-            }
-            await listMajors();
-        };
-
-        if (gapi.client.getToken() === null) {
-            // Prompt the user to select a Google Account and ask for consent to share their data
-            // when establishing a new session.
-            tokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-            // Skip display of account chooser and consent dialog for an existing session.
-            tokenClient.requestAccessToken({ prompt: '' });
+// If everything is load, we can continue
+export function FinishLoad() {
+    tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            throw (resp);
         }
+    };
+
+    if (gapi.client.getToken() === null) {
+        // Prompt the user to select a Google Account and ask for consent to share their data
+        // when establishing a new session.
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+        // Skip display of account chooser and consent dialog for an existing session.
+        tokenClient.requestAccessToken({ prompt: '' });
     }
+
+    console.log("finish load");
 }
 
-const listMajors = () => {
+const ManageError = (response) => {
+    const result = response.result;
+    if (result.error && result.error.status) {
+        console.log('Error calling API:' + result.error.status);
+    } else if (result.error) {
+        const error = result.error.details[0];
+        console.log('Script error message: ' + error.errorMessage);
+        if (error.scriptStackTraceElements) {
+            // There may not be a stacktrace if the script didn't start executing.
+            console.log('Script error stacktrace:');
+            for (let i = 0; i < error.scriptStackTraceElements.length; i++) {
+                const trace = error.scriptStackTraceElements[i];
+                console.log('\t' + trace.function + ':' + trace.lineNumber);
+            }
+        }
 
-    console.log(gapi);
-    gapi.client.script.scripts.run({
+    }
+    return result.response.result;
+}
+
+
+export const GetQuestions = (): Promise<Question_t[]> => {
+
+    return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getQuizz',
@@ -68,31 +81,10 @@ const listMajors = () => {
                 "5B", "BB vs BTN", 3, 50
             ],
         },
-    }).then((resp) => {
-        console.log(resp);
-        const result = resp.result;
-        if (result.error && result.error.status) {
-            console.log('Error calling API:' + result.error.status);
-        } else if (result.error) {
-            const error = result.error.details[0];
-            console.log('Script error message: ' + error.errorMessage);
-            if (error.scriptStackTraceElements) {
-                // There may not be a stacktrace if the script didn't start
-                // executing.
-                console.log('Script error stacktrace:');
-                for (let i = 0; i < error.scriptStackTraceElements.length; i++) {
-                    const trace = error.scriptStackTraceElements[i];
-                    console.log('\t' + trace.function + ':' + trace.lineNumber);
-                }
-            }
-        } else {
-            const quizz = result.response.result;
-            console.log(quizz)
-        }
-    });
+    }).then((result) => { return result }).then(ManageError).then((questions: Question_t[]) => { return questions });
 }
 
-export const Api = () => {
+export const Api = async () => {
     useEffect(() => {
         const scriptAPI = document.createElement('script');
         scriptAPI.src = 'https://apis.google.com/js/api.js';
@@ -108,18 +100,11 @@ export const Api = () => {
         document.body.appendChild(scriptAccount);
 
         scriptAPI.addEventListener('load', () => {
-
             gapiLoaded();
         });
 
-
         scriptAccount.addEventListener('load', () => {
-            console.log("loadGIS")
             gisLoaded();
         });
     }, []);
-
-
-    return (<>
-    </>);
 }
