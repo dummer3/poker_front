@@ -14,6 +14,10 @@
     color: #383838
 }
 
+.teal {
+    color: teal;
+}
+
 .bg-black {
     background-color: black;
 }
@@ -161,6 +165,22 @@
     border-bottom: dotted #373737 2px;
 }
 
-.separator :not(:last-child) {
+.separator> :not(:last-child) {
     border-right: solid #373737 2px;
+}
+
+.flex-overlay>* {
+    flex-basis: 33%;
+}
+
+input[type="checkbox"] {
+    clip-path: circle(42%);
+    border-width: 0;
+}
+
+.btn-xs {
+    --bs-btn-padding-y: 0.25rem;
+    --bs-btn-padding-x: 0.25rem;
+    --bs-btn-font-size: 0.75rem;
+    --bs-btn-border-radius: 0.25rem;
 }

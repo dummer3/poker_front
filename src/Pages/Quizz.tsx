@@ -59,8 +59,8 @@ const POSITION =
     "UTG+1": 1,
     "UTG+2": 2,
     BTN: 3,
-    BB: 4,
-    SB: 5
+    SB: 4,
+    BB: 5
 }
 
 enum ACTION {
@@ -255,7 +255,7 @@ export const Quizz = ({ position }) => {
 
     return (
         <div className="quizz d-flex flex-column">
-            <Header title={`Score: ${score}`} leftText="3-bet" leftSub="UTG" rightText={`Question n°${nbrQuestion + 1}/10`} />
+            <Header title={`Score: ${score}`} leftText="3-bet" leftSub="UTG" rightText={`Question n°${nbrQuestion + 1}/${Math.min(questions.length, quizz.nbrQuestion)}`} />
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
                     {PlacePlayer().map(

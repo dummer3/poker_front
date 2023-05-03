@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Question_t, Quizz_t } from '../types/type';
-import { Quizz } from './Quizz';
 
 declare var google: any
 declare var gapi: any
@@ -71,13 +70,25 @@ const ManageError = (response) => {
     return result.response.result;
 }
 
+export const getScenarios = ({ position, situation }): Promise<String[]> => {
+    return gapi.client.script.scripts.run({
+        'scriptId': process.env.REACT_APP_API_ID,
+        'resource': {
+            'function': 'getScenarios',
+            "parameters": [
+                position, situation
+            ],
+        },
+    }).then(ManageError).then((questions: Question_t[]) => { return questions });
+}
 
-export const GetQuestions = (): Promise<Question_t[]> => {
+
+export const GetQuestions = async (): Promise<Question_t[]> => {
 
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
-            'function': 'getQuizz',
+            'function': 'getQuestions',
             "parameters": [
                 "5B", "BB vs BTN", 3, 50
             ],
@@ -86,6 +97,7 @@ export const GetQuestions = (): Promise<Question_t[]> => {
 }
 
 export const saveQuizz = (quizz: Question_t): Promise<void> => {
+    console.log(quizz);
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
