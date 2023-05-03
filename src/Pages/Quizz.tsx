@@ -4,7 +4,7 @@ import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
-import { QuestionsContext } from '../context/QuizzContext'
+import { QuestionsContext, QuizzContext } from '../context/QuizzContext'
 import { Question_t } from '../types/type'
 import { Header } from './Header'
 
@@ -222,6 +222,7 @@ const Player = (card, x, y, position, index: number) => {
 export const Quizz = ({ position }) => {
 
     const [questions] = useContext(QuestionsContext);
+    const [quizz] = useContext(QuizzContext);
     const [nbrQuestion, setNbrQuestion] = useState(0);
     const [score, setScore] = useState(0);
     const [heroCard, setHeroCard] = useState({ sr: SUIT.CLUB, sl: 0, vr: VALUE.Q, vl: 0 });

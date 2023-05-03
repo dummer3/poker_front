@@ -11,7 +11,8 @@ export type Question_t = {
 }
 
 export type Quizz_t = {
-    question_number: number,
+    id: number,
+    nbrQuestion: number,
     difficulty: number,
     position: string[],
     scenario: string[]

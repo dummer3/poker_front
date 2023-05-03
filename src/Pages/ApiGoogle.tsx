@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Question_t } from '../types/type';
+import { Question_t, Quizz_t } from '../types/type';
+import { Quizz } from './Quizz';
 
 declare var google: any
 declare var gapi: any
@@ -81,7 +82,26 @@ export const GetQuestions = (): Promise<Question_t[]> => {
                 "5B", "BB vs BTN", 3, 50
             ],
         },
-    }).then((result) => { return result }).then(ManageError).then((questions: Question_t[]) => { return questions });
+    }).then(ManageError).then((questions: Question_t[]) => { return questions });
+}
+
+export const saveQuizz = (quizz: Question_t): Promise<void> => {
+    return gapi.client.script.scripts.run({
+        'scriptId': process.env.REACT_APP_API_ID,
+        'resource': {
+            'function': 'newQuizz',
+            "parameters": quizz
+        }
+    }).then(ManageError);
+}
+
+export const getQuizz = (): Promise<Quizz_t[]> => {
+    return gapi.client.script.scripts.run({
+        'scriptId': process.env.REACT_APP_API_ID,
+        'resource': {
+            'function': 'getQuizz',
+        }
+    }).then(ManageError).then((value: Quizz_t[]) => { return value });
 }
 
 export const Api = async () => {

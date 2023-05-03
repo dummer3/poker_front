@@ -46,6 +46,10 @@
     background-color: #228900 !important;
 }
 
+.bg-subMenu {
+    background-color: #373737 !important;
+}
+
 .row {
     display: flex;
     justify-content: space-around;
@@ -151,4 +155,12 @@
 .dealer-btn {
     position: relative;
     width: 40px;
+}
+
+.separator {
+    border-bottom: dotted #373737 2px;
+}
+
+.separator :not(:last-child) {
+    border-right: solid #373737 2px;
 }
