@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Question_t, Quizz_t } from '../types/type';
-import { Quizz } from './Quizz';
 
 declare var google: any
 declare var gapi: any
