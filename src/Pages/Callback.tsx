@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { initializeApiClient, oauthSignIn } from "./ApiGoogle";
 import { useNavigate } from "react-router-dom";
 var fragmentString: string = window.location.hash.substring(1);
@@ -29,7 +29,7 @@ export const Callback = () => {
     let m: RegExpExecArray;
     const navigate = useNavigate();
 
-    while (m = regex.exec(fragmentString)) {
+    while ((m = regex.exec(fragmentString))) {
         params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
     }
     if (Object.keys(params).length > 0) {

@@ -16,10 +16,7 @@ export const SituationOverlay = ({ title }) => {
         }} /> {legend} </div>);
     }
 
-    let checkbox = Object.entries(checks).map(([k, v]) => <SituationCheckbox key={'checkbox_' + k} legend={k} value={v} />);
-
     useEffect(() => {
-        checkbox = Object.entries(checks).map(([k, v]) => <SituationCheckbox key={'checkbox_' + k} legend={k} value={v} />)
         const temp: Quizz_t = { ...quizz };
         temp.situations = [];
         Object.keys(checks).filter(key => checks[key]).forEach(key => temp.situations.push(key));
@@ -40,7 +37,7 @@ export const SituationOverlay = ({ title }) => {
 
         </div>
         {show && <div className='content d-flex flex-wrap w-100 flex-overlay justify-content-center'>
-            {checkbox}
+            {Object.entries(checks).map(([k, v]) => <SituationCheckbox key={'checkbox_' + k} legend={k} value={v} />)}
         </div>}
 
     </div>);
@@ -59,10 +56,7 @@ export const PositionOverlay = ({ title }) => {
         }} /> {legend} </div>);
     }
 
-    let checkbox = Object.entries(checks).map(([k, v]) => <PositionCheckbox key={'checkbox_' + k} legend={k} value={v} />);
-
     useEffect(() => {
-        checkbox = Object.entries(checks).map(([k, v]) => <PositionCheckbox key={'checkbox_' + k} legend={k} value={v} />)
         const temp: Quizz_t = { ...quizz };
         temp.positions = [];
         Object.keys(checks).filter(key => checks[key]).forEach(key => temp.positions.push(key));
@@ -108,10 +102,7 @@ export const ScenarioOverlay = ({ title, scenarios }) => {
             tempChecks[legend] = !tempChecks[legend]; setChecks(tempChecks);
         }} /> {legend} </div>
 
-    let checkbox = Object.entries(checks).map(([k, v]) => <ScenarioCheckbox key={'checkbox_' + k} legend={k} value={v} />);
-
     useEffect(() => {
-        checkbox = Object.entries(checks).map(([k, v]) => <ScenarioCheckbox key={'checkbox_' + k} legend={k} value={v} />)
         const temp: Quizz_t = { ...quizz };
         temp.scenarios = [];
         Object.keys(checks).filter(key => checks[key]).forEach(key => temp.scenarios.push(key));

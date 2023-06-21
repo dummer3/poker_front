@@ -1,10 +1,7 @@
-import { useEffect } from 'react';
 import { Question_t, Quizz_t } from '../types/type';
 
-declare var google: any
 declare var gapi: any
 
-const DISCOVERY_DOC = 'https://script.googleapis.com/$discovery/rest?version=v1';
 const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets';
 
 
