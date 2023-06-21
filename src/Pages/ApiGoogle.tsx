@@ -1,9 +1,8 @@
-import { Question_t, Quizz_t } from '../types/type';
+import { Question_t, Quizz_t } from '../types/types';
 
 declare var gapi: any
 
 const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets';
-
 
 const ManageError = (response) => {
     const result = response.result;

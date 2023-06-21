@@ -2,7 +2,7 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import './extend.css';
-import { Question_t, Quizz_t } from './types/type';
+import { Question_t, Quizz_t } from './types/types';
 import { Home } from './Pages/Home';
 import { Quizz } from './Pages/Quizz';
 import { Callback, WaitForAuthentification } from './Pages/Callback';

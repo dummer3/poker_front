@@ -5,7 +5,7 @@ import { QuestionsContext, QuizzContext } from "../context/QuizzContext";
 import { useNavigate } from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import ReactStars from "react-rating-stars-component";
-import { Quizz_t } from "../types/type";
+import { Quizz_t } from "../types/types";
 import { SituationOverlay, PositionOverlay, ScenarioOverlay } from "./Overlay";
 
 const SubMenu = ({ col, title, content, logo }) => <div className={`SubMenu bg-subMenu ${col} px-0 d-flex flex-column`}>

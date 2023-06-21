@@ -5,7 +5,7 @@ import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
 import { QuestionsContext, QuizzContext } from '../context/QuizzContext'
-import { Question_t } from '../types/type'
+import { Question_t } from '../types/types'
 import { Header } from './Header'
 
 /**
