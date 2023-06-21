@@ -1,27 +1,27 @@
 import { useContext, useEffect, useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { Quizz_t } from '../types/type';
 import { QuizzContext } from '../context/QuizzContext';
-
 
 export const SituationOverlay = ({ title }) => {
     const [show, setShow] = useState(false);
     const [checks, setChecks] = useState({ OP: false, "3-Bet": false, "4-Bet": false, "5-Bet": false })
-    const [quizz, setQuizz] = useContext(QuizzContext);
+    const [, setQuizz] = useContext(QuizzContext);
 
     const SituationCheckbox = ({ legend, value }) => {
-        return (<div><input type='checkbox' value={legend} checked={value} onChange={(e) => {
+        return (<div><input type='checkbox' value={legend} checked={value} onChange={() => {
             const tempChecks = { ...checks };
             tempChecks[legend] = !tempChecks[legend]; setChecks(tempChecks);
         }} /> {legend} </div>);
     }
 
     useEffect(() => {
-        const temp: Quizz_t = { ...quizz };
-        temp.situations = [];
-        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.situations.push(key));
-        setQuizz(temp);
-    }, [checks])
+        setQuizz(prevQuizz => {
+            const temp = { ...prevQuizz };
+            temp.situations = [];
+            Object.keys(checks).filter(key => checks[key]).forEach(key => temp.situations.push(key));
+            return temp;
+        });
+    }, [checks, setQuizz])
 
 
     return (<div className="overlay py-2 align-self-start px-2 w-100">
@@ -46,7 +46,7 @@ export const SituationOverlay = ({ title }) => {
 export const PositionOverlay = ({ title }) => {
     const [show, setShow] = useState(false);
     const [checks, setChecks] = useState({ UTG: false, HJ: false, CO: false, BTN: false, SB: false, BB: false })
-    const [quizz, setQuizz] = useContext(QuizzContext);
+    const [, setQuizz] = useContext(QuizzContext);
 
     const PositionCheckbox = ({ legend, value }) => {
 
@@ -57,11 +57,13 @@ export const PositionOverlay = ({ title }) => {
     }
 
     useEffect(() => {
-        const temp: Quizz_t = { ...quizz };
-        temp.positions = [];
-        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.positions.push(key));
-        setQuizz(temp);
-    }, [checks])
+        setQuizz(prevQuizz => {
+            const temp = { ...prevQuizz };
+            temp.positions = [];
+            Object.keys(checks).filter(key => checks[key]).forEach(key => temp.positions.push(key));
+            return temp;
+        });
+    }, [checks, setQuizz])
 
     return (<div className="overlay py-2 align-self-start px-2 w-100">
         <div className='header d-flex '>
@@ -83,7 +85,7 @@ export const PositionOverlay = ({ title }) => {
 
 export const ScenarioOverlay = ({ title, scenarios }) => {
     const [show, setShow] = useState(false);
-    const [quizz, setQuizz] = useContext(QuizzContext);
+    const [, setQuizz] = useContext(QuizzContext);
     const [checks, setChecks] = useState({});
 
     useEffect(() => {
@@ -103,11 +105,13 @@ export const ScenarioOverlay = ({ title, scenarios }) => {
         }} /> {legend} </div>
 
     useEffect(() => {
-        const temp: Quizz_t = { ...quizz };
-        temp.scenarios = [];
-        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.scenarios.push(key));
-        setQuizz(temp);
-    }, [checks])
+        setQuizz(prevQuizz => {
+            const temp = { ...prevQuizz };
+            temp.scenarios = [];
+            Object.keys(checks).filter(key => checks[key]).forEach(key => temp.scenarios.push(key));
+            return temp;
+        });
+    }, [checks, setQuizz])
 
     return (<div className="overlay py-2 align-self-start px-2 w-100">
         <div className='header d-flex '>
