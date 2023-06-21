@@ -14,7 +14,7 @@ export type Quizz_t = {
     id: number,
     nbrQuestion: number,
     difficulty: number,
-    position: string[],
-    situation: string[],
-    scenario: string[]
+    positions: string[],
+    situations: string[],
+    scenarios: string[]
 }

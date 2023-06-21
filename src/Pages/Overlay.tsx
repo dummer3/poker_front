@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Quizz_t } from '../types/type';
-import { title } from 'process';
-import { Quizz } from './Quizz';
 import { QuizzContext } from '../context/QuizzContext';
 
 
@@ -23,8 +21,8 @@ export const SituationOverlay = ({ title }) => {
     useEffect(() => {
         checkbox = Object.entries(checks).map(([k, v]) => <SituationCheckbox key={'checkbox_' + k} legend={k} value={v} />)
         const temp: Quizz_t = { ...quizz };
-        temp.situation = [];
-        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.situation.push(key));
+        temp.situations = [];
+        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.situations.push(key));
         setQuizz(temp);
     }, [checks])
 
@@ -66,8 +64,8 @@ export const PositionOverlay = ({ title }) => {
     useEffect(() => {
         checkbox = Object.entries(checks).map(([k, v]) => <PositionCheckbox key={'checkbox_' + k} legend={k} value={v} />)
         const temp: Quizz_t = { ...quizz };
-        temp.position = [];
-        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.position.push(key));
+        temp.positions = [];
+        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.positions.push(key));
         setQuizz(temp);
     }, [checks])
 
@@ -91,24 +89,32 @@ export const PositionOverlay = ({ title }) => {
 
 export const ScenarioOverlay = ({ title, scenarios }) => {
     const [show, setShow] = useState(false);
-    const [checks, setChecks] = useState({ ...scenarios })
     const [quizz, setQuizz] = useContext(QuizzContext);
+    const [checks, setChecks] = useState({});
 
-    const ScenarioCheckbox = ({ legend, value }) => {
+    useEffect(() => {
+        let temp = {};
+        for (const key of scenarios) {
+            temp[key] = false;
+        }
+        setChecks(temp);
+    },
+        [scenarios]);
 
-        return (<div><input type='checkbox' value={legend} checked={value} onChange={(e) => {
+
+    const ScenarioCheckbox = ({ legend, value }) =>
+        <div><input type='checkbox' value={legend} checked={value} onChange={(e) => {
             const tempChecks = { ...checks };
             tempChecks[legend] = !tempChecks[legend]; setChecks(tempChecks);
-        }} /> {legend} </div>);
-    }
+        }} /> {legend} </div>
 
     let checkbox = Object.entries(checks).map(([k, v]) => <ScenarioCheckbox key={'checkbox_' + k} legend={k} value={v} />);
 
     useEffect(() => {
         checkbox = Object.entries(checks).map(([k, v]) => <ScenarioCheckbox key={'checkbox_' + k} legend={k} value={v} />)
         const temp: Quizz_t = { ...quizz };
-        temp.scenario = [];
-        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.scenario.push(key));
+        temp.scenarios = [];
+        Object.keys(checks).filter(key => checks[key]).forEach(key => temp.scenarios.push(key));
         setQuizz(temp);
     }, [checks])
 

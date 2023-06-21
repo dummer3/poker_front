@@ -23,12 +23,16 @@ export const Home = () => {
     const [_, setQuestions] = useContext(QuestionsContext);
     const [quizz, setQuizz] = useContext(QuizzContext);
     const [createdQuizz, setCreatedQuizz] = useState<Quizz_t[]>([]);
-    const [scenarios, setScenarios] = useState([])
+    const [scenarios, setScenarios] = useState([]);
+
+    useEffect(() => {
+        API.getQuizz().then(setCreatedQuizz)
+    }, []);
 
     const listofQuizz = createdQuizz.map((x: Quizz_t) => {
         return (<div key={`quizz_${x.id}`} className="row separator text-center align-middle ">
-            <div className="col d-inline-flex flex-column align-items-center justify-content-center">  {x.position.map(el => { return <div key={`position_${el}`}> {el} </div> })} </div>
-            <div className="col d-inline-flex flex-column align-items-center justify-content-center">  {x.situation.map(el => { return <div key={`situation_${el}`}> {el} </div> })}</div>
+            <div className="col d-inline-flex flex-column align-items-center justify-content-center">  {x.positions.map(el => { return <div key={`position_${el}`}> {el} </div> })} </div>
+            <div className="col d-inline-flex flex-column align-items-center justify-content-center">  {x.situations.map(el => { return <div key={`situation_${el}`}> {el} </div> })}</div>
             <div className="col d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>
             <div className="col d-inline-flex align-items-center justify-content-center">  {x.difficulty} </div>
             <div className="col h1 bi bi-play-circle-fill m-0 d-inline-flex flex-wrap align-items-center justify-content-center" onClick={() => {
@@ -39,27 +43,22 @@ export const Home = () => {
 
     useEffect(() => {
         try {
-            API.getScenarios({ position: quizz.position, situation: quizz.situation }).then(
-                (value) => { let temp = { ...quizz }; temp.scenario = value; setQuizz(temp); });
+            API.getScenarios({ positions: quizz.positions, situations: quizz.situations }).then(setScenarios);
         }
         catch
         {
             console.log("gapi not load");
         }
-    }, [quizz.situation, quizz.position])
+    }, [quizz.situations, quizz.positions])
 
     return (
         <div className="Home">
-            <button className='btn-primary ' onClick={() => API.FinishLoad()}> LOAD </button >
-            <button className='btn-primary ' onClick={() => {
-                API.GetQuestions().then(value => { setQuestions(value); console.log(value); navigate("/quiz"); })
-            }}> NEW QUIZZ</button>
             <Header title="Quizz" />
             <div className="grid white mx-2">
                 <div className="row gx-0">
                     <SubMenu col="col-4" logo="bi-plus-circle" title="CREATE QUIZZ" content={
                         <div className="content">
-                            <form className="d-inline-flex flex-column flex-wrap align-items-center w-100" onSubmit={(e) => { e.preventDefault(); API.saveQuizz(quizz).then(() => API.getQuizz()).then((value) => setCreatedQuizz(value)); }}>
+                            <form className="d-inline-flex flex-column flex-wrap align-items-center w-100" onSubmit={(e) => { e.preventDefault(); API.saveQuizz(quizz).then(() => API.getQuizz()).then((value) => { setCreatedQuizz(value); console.log(value) }); }}>
 
                                 <div className="row">
                                     <label htmlFor="difficulty" className="justify-content w-50 ">

@@ -5,50 +5,8 @@ declare var google: any
 declare var gapi: any
 
 const DISCOVERY_DOC = 'https://script.googleapis.com/$discovery/rest?version=v1';
-const SCOPES = 'https://www.googleapis.com/auth/script.projects';
+const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets';
 
-let tokenClient;
-
-// Init the oAuth connection with our poker project
-const gapiLoaded = async () => {
-    gapi.load('client', initializeGapiClient);
-}
-
-const initializeGapiClient = async () => {
-    await gapi.client.init({
-        apiKey: process.env.REACT_APP_API_KEY,
-        discoveryDocs: [DISCOVERY_DOC],
-    });
-}
-
-// Create the token to allow call 
-const gisLoaded = () => {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: process.env.REACT_APP_CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // defined later
-    });
-}
-
-// If everything is load, we can continue
-export function FinishLoad() {
-    tokenClient.callback = async (resp) => {
-        if (resp.error !== undefined) {
-            throw (resp);
-        }
-    };
-
-    if (gapi.client.getToken() === null) {
-        // Prompt the user to select a Google Account and ask for consent to share their data
-        // when establishing a new session.
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-    } else {
-        // Skip display of account chooser and consent dialog for an existing session.
-        tokenClient.requestAccessToken({ prompt: '' });
-    }
-
-    console.log("finish load");
-}
 
 const ManageError = (response) => {
     const result = response.result;
@@ -70,13 +28,13 @@ const ManageError = (response) => {
     return result.response.result;
 }
 
-export const getScenarios = ({ position, situation }): Promise<String[]> => {
+export const getScenarios = ({ positions, situations }): Promise<String[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getScenarios',
             "parameters": [
-                position, situation
+                positions, situations
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
@@ -90,7 +48,7 @@ export const GetQuestions = async (): Promise<Question_t[]> => {
         'resource': {
             'function': 'getQuestions',
             "parameters": [
-                "5B", "BB vs BTN", 3, 50
+                "5-Bet", "BB vs BTN", 3, 50
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
@@ -111,32 +69,55 @@ export const getQuizz = (): Promise<Quizz_t[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
-            'function': 'getQuizz',
+            'function': 'getQuizz'
         }
     }).then(ManageError).then((value: Quizz_t[]) => { return value });
 }
 
-export const Api = async () => {
-    useEffect(() => {
-        const scriptAPI = document.createElement('script');
-        scriptAPI.src = 'https://apis.google.com/js/api.js';
-        scriptAPI.async = true;
-        scriptAPI.defer = true;
+export function oauthSignIn() {
+    // Google's OAuth 2.0 endpoint for requesting an access token
+    var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
 
-        const scriptAccount = document.createElement('script');
-        scriptAccount.src = 'https://accounts.google.com/gsi/client';
-        scriptAccount.async = true;
-        scriptAccount.defer = true;
+    // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+    var form = document.createElement('form');
+    form.setAttribute('method', 'GET'); // Send as a GET request.
+    form.setAttribute('action', oauth2Endpoint);
 
-        document.body.appendChild(scriptAPI);
-        document.body.appendChild(scriptAccount);
+    // Parameters to pass to OAuth 2.0 endpoint.
+    var params = {
+        'client_id': process.env.REACT_APP_CLIENT_ID,
+        'redirect_uri': 'http://127.0.0.1:3000/callback',
+        'response_type': 'token',
+        'scope': SCOPES,
+        //'include_granted_scopes': 'true',
+        'state': 'pass-through value'
+    };
 
-        scriptAPI.addEventListener('load', () => {
-            gapiLoaded();
-        });
+    // Add form parameters as hidden input values.
+    for (var p in params) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'hidden');
+        input.setAttribute('name', p);
+        input.setAttribute('value', params[p]);
+        form.appendChild(input);
+    }
 
-        scriptAccount.addEventListener('load', () => {
-            gisLoaded();
-        });
-    }, []);
+    // Add form to page and submit it to open the OAuth 2.0 endpoint.
+    document.body.appendChild(form);
+    form.submit();
+}
+
+export function initializeApiClient(token: string) {
+    gapi.load('client', () => {
+        gapi.client
+            .init({
+                apiKey: process.env.REACT_APP_API_KEY,
+                discoveryDocs: ['https://script.googleapis.com/$discovery/rest?version=v1'],
+            })
+            .then(() => {
+                gapi.auth.setToken({
+                    access_token: token,
+                });
+            });
+    });
 }

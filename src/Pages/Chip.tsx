@@ -2,15 +2,33 @@ import chip_img from "../img/chip.webp"
 
 const chipSize = 25
 
-const chipsValue = [
-    { color: "black", value: 100 },
-    { color: "green", value: 25 },
-    { color: "blue", value: 10 },
-    { color: "red", value: 5 },
-    { color: "white", value: 1 }
-]
+// Export the enum just to be see in the TSDoc.
+// It's better to let it intern since we don't need it elsewhere
+// Else it should be use by one of the function below, but we don't need it also
 
-export const BreakDownToChip = (value: number) => {
+/**
+ * CHIPSVALUE enum for the conversion color <-> value.
+ * @readonly
+ * @public
+ * @enum {number}
+ */
+enum CHIPSVALUE {
+    "black" = 100,
+    "green" = 25,
+    "blue" = 10,
+    "red" = 5,
+    "white" = 1
+}
+
+
+/**
+ * @public
+ * Figure out the chips need to represent the value.
+ * @param {number} value - Value to figure out.
+ * @returns {number[]} - The list of chips to represent the value.
+ */
+export const BreakDownToChip = (value: number): number[] => {
+
     let index: number = 0;
 
     let currentChip: any[] = [
@@ -21,21 +39,31 @@ export const BreakDownToChip = (value: number) => {
         { color: "white", value: 0 }
     ];
 
+    const values: number[] = Object.values(CHIPSVALUE).filter(k => typeof k === "number").map(k => { return +k })
+
     while (value > 0) {
-        while (chipsValue[index].value > value) {
+        while (values[index] > value) {
             index++;
         }
 
         currentChip[index].value++;
-        value -= chipsValue[index].value;
+        value -= values[index];
     }
 
     return currentChip.filter(x => x.value !== 0)
 }
 
-const ChipStack = (stack, stack_index: number) => {
-    return (Array.from({ length: stack.value }, (_, index) => {
-        return <img src={chip_img} width={`${chipSize}px`} className={stack.color + "-token"} key={`stack-${stack_index}-${index}`} alt={`${stack.color}-token`} style={{
+/**
+ * @public
+ * 
+ * @param {number} stack_length - The length of this stack.
+ * @param {number} stack_index - This stack index.
+ * 
+ * @returns {JSX.Element[]} - The representation of this stack.
+ */
+const ChipStack = (stack_length, stack_index: number) => {
+    return (Array.from({ length: stack_length.value }, (_, index) => {
+        return <img src={chip_img} width={`${chipSize}px`} className={stack_length.color + "-token"} key={`stack-${stack_index}-${index}`} alt={`${stack_length.color}-token`} style={{
             position: 'relative',
             left: stack_index * chipSize + 'px',
             top: -index * chipSize / 10 + 'px',
@@ -43,10 +71,15 @@ const ChipStack = (stack, stack_index: number) => {
     }))
 }
 
-export const ValueWithChip = (number: number) => {
-
-
-    const chips = BreakDownToChip(number);
+/**
+ * @public
+ * 
+ * @param {number} value - The value to represent.
+ * 
+ * @returns {JSX.Element} - The JSX element to represent the value with chips.
+ */
+export const ValueWithChip = (value: number) => {
+    const chips = BreakDownToChip(value);
 
     const length = chips.length - 1;
 
