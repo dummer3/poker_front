@@ -12,7 +12,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   const [quizz, setQuizz] = useState<Quizz_t>({ nbrQuestion: 10, positions: [], situations: [], scenarios: [], difficulty: 10, id: 0 });
-  const [questions, setQuestions] = useState<Question_t[]>([{ hand: "AAo", difficulty: 10, R: 0, F: 0, C: 0, RC: 0, CF: 0, RF: 0, Action: "R" }]);
+  const [questions, setQuestions] = useState<Question_t[]>([{ hand: "AAo", difficulty: 10, R: 0, F: 0, C: 0, RC: 0, CF: 0, RF: 0, Action: "R", situation: "", position: "", scenario: "" }]);
 
   return (
     <div className="App">
@@ -22,7 +22,7 @@ function App() {
             <Routes>
               <Route path="/" element={<WaitForAuthentification />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/quiz" element={<Quizz position={0} />} />
+              <Route path="/quiz" element={<Quizz />} />
               <Route path="/callback" element={<Callback />} />
             </Routes>
           </BrowserRouter>

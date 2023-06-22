@@ -7,7 +7,10 @@ export type Question_t = {
     CF: number,
     F: number,
     hand: string,
-    difficulty: number
+    difficulty: number,
+    scenario: string,
+    situation: string,
+    position: string
 }
 
 export type Quizz_t = {

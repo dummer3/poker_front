@@ -37,14 +37,14 @@ export const getScenarios = ({ positions, situations }): Promise<String[]> => {
 }
 
 
-export const GetQuestions = async (): Promise<Question_t[]> => {
+export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
 
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getQuestions',
             "parameters": [
-                "5-Bet", "BB vs BTN", 3, 50
+                quizz.scenarios, quizz.difficulty, quizz.nbrQuestion
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });

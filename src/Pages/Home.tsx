@@ -19,8 +19,7 @@ const SubMenu = ({ col, title, content, logo }) => <div className={`SubMenu bg-s
 
 export const Home = () => {
     const navigate = useNavigate();
-    // eslint-disable-next-line 
-    const [_, setQuestions] = useContext(QuestionsContext);
+    const [, setQuestions] = useContext(QuestionsContext);
     const [quizz, setQuizz] = useContext(QuizzContext);
     const [createdQuizz, setCreatedQuizz] = useState<Quizz_t[]>([]);
     const [scenarios, setScenarios] = useState([]);
@@ -31,12 +30,11 @@ export const Home = () => {
 
     const listofQuizz = createdQuizz.map((x: Quizz_t) => {
         return (<div key={`quizz_${x.id}`} className="row separator text-center align-middle ">
-            <div className="col d-inline-flex flex-column align-items-center justify-content-center">  {x.positions.map(el => { return <div key={`position_${el}`}> {el} </div> })} </div>
-            <div className="col d-inline-flex flex-column align-items-center justify-content-center">  {x.situations.map(el => { return <div key={`situation_${el}`}> {el} </div> })}</div>
-            <div className="col d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>
-            <div className="col d-inline-flex align-items-center justify-content-center">  {x.difficulty} </div>
-            <div className="col h1 bi bi-play-circle-fill m-0 d-inline-flex flex-wrap align-items-center justify-content-center" onClick={() => {
-                API.GetQuestions().then(value => { setQuestions(value); setQuizz(x); navigate("/quiz"); })
+            <div className="col-6 d-inline-flex flex-column align-items-center justify-content-center">  {x.scenarios.map(el => { return <div key={`position_${el}`}> {el} </div> })} </div>
+            <div className="col-2 d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>
+            <div className="col-2 d-inline-flex align-items-center justify-content-center">  {x.difficulty} </div>
+            <div className="col-2 h1 bi bi-play-circle-fill m-0 d-inline-flex flex-wrap align-items-center justify-content-center" onClick={() => {
+                API.GetQuestions(x).then(value => { setQuestions(value); setQuizz(x); navigate("/quiz"); })
             }}> </div>
         </div>);
     });
@@ -90,16 +88,19 @@ export const Home = () => {
                         </div>
                     } />
 
-                    <SubMenu col="col-8 ms-2" logo="bi-play-circle-fill" title="CREATED QUIZZ" content={<div className="content black bg-white m-2" style={{ height: "50vh", overflowY: "auto", overflowX: "hidden" }}>
-                        <div className="row separator">
-                            <div className="col"> Position </div>
-                            <div className="col"> Situation</div>
-                            <div className="col"> Number </div>
-                            <div className="col"> Difficulty </div>
-                            <div className="col"> Play it </div>
-                        </div>
-                        {listofQuizz}
-                    </div>} />
+                    <SubMenu col="col-8 ms-2" logo="bi-play-circle-fill" title="CREATED QUIZZ" content={
+                        <div className="content black bg-white m-2">
+                            <div className="row separator" style={{ overflowX: "hidden", overflowY: "auto", scrollbarGutter: "stable" }}>
+                                <div className="col-6"> Scenarios </div>
+                                <div className="col-2"> Number </div>
+                                <div className="col-2"> Difficulty </div>
+                                <div className="col-2"> Play it </div>
+                            </div>
+                            <div className="mx-0" style={{ height: "50vh", overflowY: "auto", overflowX: "hidden", scrollbarGutter: "stable" }}>
+                                {listofQuizz}
+                            </div>
+                        </div>}
+                    />
                 </div>
                 <div className="row mt-2 gx-0">
                     <SubMenu col="col-4" logo="bi-plus-circle" title="STATISTIC" content={<></>} />
