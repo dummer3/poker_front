@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import ReactStars from "react-rating-stars-component";
 import { Quizz_t } from "../types/types";
-import { SituationOverlay, PositionOverlay, ScenarioOverlay } from "./Overlay";
+import { Overlay, ScenarioOverlay } from "./Overlay";
 
 const SubMenu = ({ col, title, content, logo }) => <div className={`SubMenu bg-subMenu ${col} px-0 d-flex flex-column`}>
     <div className="header d-flex ">
@@ -17,6 +17,10 @@ const SubMenu = ({ col, title, content, logo }) => <div className={`SubMenu bg-s
 </div>
 
 
+/**
+ * function to create the home page
+ * @returns {HTMLElement} - The home page
+ */
 export const Home = () => {
     const navigate = useNavigate();
     const [, setQuestions] = useContext(QuestionsContext);
@@ -41,7 +45,8 @@ export const Home = () => {
 
     useEffect(() => {
         try {
-            API.getScenarios({ positions: quizz.positions, situations: quizz.situations }).then(setScenarios);
+            if (quizz.situations !== null && quizz.positions != null)
+                API.getScenarios({ positions: quizz.positions, situations: quizz.situations }).then(setScenarios);
         }
         catch
         {
@@ -79,9 +84,13 @@ export const Home = () => {
                                 </div>
 
 
-                                <SituationOverlay title={"situation"} />
-                                <PositionOverlay title={"position"} />
-                                <ScenarioOverlay title={"scenario"} scenarios={scenarios} />
+                                <Overlay title={"situations"} labels={["OP", "3-Bet", "4-Bet", "5-Bet"]} set={(checks, temp) => {
+                                    temp.situations = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.situations.push(key) })
+                                }} />
+                                <Overlay title={"positions"} labels={["UTG", "HJ", "CO", "BTN", "SB", "BB"]} set={(checks, temp) => {
+                                    temp.positions = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.positions.push(key) })
+                                }} />
+                                <ScenarioOverlay title={"scenarios"} scenarios={scenarios} />
 
                                 <input type="submit" className="btn btn-primary my-2" value="CREATE QUIZZ" />
                             </form >

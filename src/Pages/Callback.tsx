@@ -3,11 +3,19 @@ import { initializeApiClient, oauthSignIn } from "./ApiGoogle";
 import { useNavigate } from "react-router-dom";
 var fragmentString: string = window.location.hash.substring(1);
 
+/**
+ * function to launch the authentification
+ * @returns {HTMLElement} - waiting page
+ */
 export const WaitForAuthentification = () => {
     oauthSignIn();
     return <h1>Authentification start</h1>
 }
 
+/**
+ * function to receive the token and initialized the Google API
+ * @returns {HTMLElement} - waiting page
+ */
 export const Callback = () => {
 
     useEffect(() => {

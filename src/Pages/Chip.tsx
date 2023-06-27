@@ -12,7 +12,7 @@ const chipSize = 25
  * @public
  * @enum {number}
  */
-enum CHIPSVALUE {
+export enum CHIPSVALUE {
     "black" = 100,
     "green" = 25,
     "blue" = 10,
@@ -23,7 +23,7 @@ enum CHIPSVALUE {
 
 /**
  * @public
- * Figure out the chips need to represent the value.
+ * Figure out the chips needed to represent the value.
  * @param {number} value - Value to figure out.
  * @returns {number[]} - The list of chips to represent the value.
  */
@@ -38,7 +38,6 @@ export const BreakDownToChip = (value: number): number[] => {
         { color: "red", value: 0 },
         { color: "white", value: 0 }
     ];
-
     const values: number[] = Object.values(CHIPSVALUE).filter(k => typeof k === "number").map(k => { return +k })
 
     while (value > 0) {

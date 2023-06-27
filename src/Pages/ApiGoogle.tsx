@@ -21,22 +21,31 @@ const ManageError = (response) => {
         }
 
     }
+
     return result.response.result;
 }
-
-export const getScenarios = ({ positions, situations }): Promise<String[]> => {
+/**
+ * Function to get all available scenarios from positions and scenarios defined
+ * @param {{positions:string, situations:string}} info - information needed to select a scenario
+ * @returns {Promise<String[]>} - list of all available scenario
+ */
+export const getScenarios = (info: { positions: string[], situations: string[] }): Promise<String[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getScenarios',
             "parameters": [
-                positions, situations
+                info.positions, info.situations
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
 }
 
-
+/**
+ * Function to get the questions of the quiz given as a parameter
+ * @param {Quizz_t} quizz - quiz we want to play 
+ * @returns {Promise<Question_t[]>} - list of all available scenarios
+ */
 export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
 
     return gapi.client.script.scripts.run({
@@ -50,6 +59,11 @@ export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
 }
 
+/**
+ * Function to save a quiz
+ * @param {Quizz_t} quizz - quiz we want to save
+ * @returns {Promise<void>} - nothing useful
+ */
 export const saveQuizz = (quizz: Question_t): Promise<void> => {
     console.log(quizz);
     return gapi.client.script.scripts.run({
@@ -61,6 +75,10 @@ export const saveQuizz = (quizz: Question_t): Promise<void> => {
     }).then(ManageError);
 }
 
+/**
+ * Function to get all the quiz save 
+ * @returns {Promise<Quizz_t[]>} - list of all the quiz save
+ */
 export const getQuizz = (): Promise<Quizz_t[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
@@ -70,6 +88,9 @@ export const getQuizz = (): Promise<Quizz_t[]> => {
     }).then(ManageError).then((value: Quizz_t[]) => { return value });
 }
 
+/**
+ * Function to let the user connect to his google account and give a token
+ */
 export function oauthSignIn() {
     // Google's OAuth 2.0 endpoint for requesting an access token
     var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -102,6 +123,11 @@ export function oauthSignIn() {
     document.body.appendChild(form);
     form.submit();
 }
+
+/**
+ * Function to initialize the connection with the google API with the user token
+ * @param {string} token - the token of the user
+ */
 
 export function initializeApiClient(token: string) {
     gapi.load('client', () => {

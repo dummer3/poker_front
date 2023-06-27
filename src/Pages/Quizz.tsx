@@ -4,9 +4,12 @@ import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
-import { QuestionsContext, QuizzContext } from '../context/QuizzContext'
+import { QuestionsContext } from '../context/QuizzContext'
 import { Question_t } from '../types/types'
 import { Header } from './Header'
+import { POSITION } from './ScenarioRepresentation'
+import { ScenarioRepresentation } from './ScenarioRepresentation'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Value enum for the value of a card.
@@ -43,25 +46,9 @@ enum SUIT {
     SPADES = 3
 }
 
-/**
- * Position enum for the player position.
- * @readonly
- * @private
- * @enum {number}
- */
-enum POSITION {
-    UTG = 0,
-    HJ = 1,
-    CO = 2,
-    BTN = 3,
-    SB = 4,
-    BB = 5
-}
-
 
 /**
  * Action enum for the basic user action.
- * @public
  * @readonly
  * @enum {string}
  */
@@ -74,8 +61,7 @@ enum ACTION {
 /**
  * Multiple_action enum for complex user action.
  * @readonly
- * @private
- * @enum {string}
+ * @enum {string} 
  */
 enum MULTIPLE_ACTION {
 
@@ -101,11 +87,11 @@ const ActionInfChoice: { color: string, action: string, abreviation: string }[] 
  * players position on the table
  */
 const players = [
-    { "x": -7, "y": 80 },
+    { "x": -7, "y": 75 },
     { "x": 3, "y": 10 },
     { "x": 43, "y": -10 },
     { "x": 83, "y": 10 },
-    { "x": 93, "y": 80 },
+    { "x": 93, "y": 75 },
 ];
 
 /**
@@ -114,7 +100,7 @@ const players = [
 const PlaceDealerBtn = [
     { "top": "-50%", "left": "70%" },
     { "top": "-30%", "left": "70%" },
-    { "top": "-30%", "left": "70%" },
+    { "top": "-50%", "left": "70%" },
     { "top": "-30%", "left": "-70%" },
     { "top": "-50%", "left": "-70%" },
     { "top": "-120%", "left": "60%" },
@@ -172,15 +158,15 @@ export const strToHand = (hand: string): { vl: VALUE; sl: SUIT; vr: VALUE; sr: S
 
 let ActiontoButton = (actions, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => (Object.keys(actions) as Array<keyof typeof actions>).filter(x => !(parseInt(x.toString()) > 0)).map((action) => {
     return (
-        <button key={action.toString()} className={`btn btn-primary bg-${ActionInfChoice.find(x => x.action === action).color} btn-lg active col mx-3 my-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "disabled" : ""}`}
-            onClick={(e) => { testAnswer(action, questions, setScore, setQuestion, score, nbrQuestion) }}> {action.toString()} </button>);
+        <button key={action.toString()} className={`btn btn-primary bg-${ActionInfChoice.find(x => x.action === action).color} btn-xs active col mx-3 mb-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "disabled" : ""}`}
+            onClick={(e) => { TestAnswer(action, questions, setScore, setQuestion, score, nbrQuestion) }}> {action.toString()} </button>);
 });
 
 
 /**
  * @public
  * Function to verify if the user choice is the correct one, and modify accordingly.
- * @param {string} action - action that the user choose.
+ * @param action - action that the user choose.
  * @param {Question_t[]} questions - the list of questions.
  * @param {any} setScore - function to modify the score.
  * @param {any} setQuestion - function to modify the question.
@@ -188,17 +174,15 @@ let ActiontoButton = (actions, questions: Question_t[], setScore, setQuestion, s
  * @param {number} nbrQuestion - the actual question number.
  * @returns none.
  */
-export const testAnswer = (action, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => {
+export const TestAnswer = (action: any, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => {
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
-    console.log(questions);
     if (abr === questions[nbrQuestion].Action) {
         setScore(score + questions[nbrQuestion][abr]);
-        console.log("CORRECT ANSWER");
     }
     else {
         setScore(score - questions[nbrQuestion][abr]);
-        console.log("WRONG ANSWER");
     }
+
     setQuestion(nbrQuestion + 1);
 }
 
@@ -254,7 +238,6 @@ export const Crop = (deck: HTMLImageElement, key: string, initialW: number, init
 };
 
 /**
- * @function Player - create one player depending of the parameters. 
  * @param {HTMLImageElement} card - card verso image 
  * @param {string} x - the horizontal position  
  * @param {string} y - the vertical position
@@ -262,18 +245,40 @@ export const Crop = (deck: HTMLImageElement, key: string, initialW: number, init
  * @param {number} index - position of the player on the table
  * @returns 
  */
-export const Player = (card: HTMLImageElement, x: string, y: string, position: POSITION, index: number): ReactElement => {
+export const Player = (card: HTMLImageElement, x: string, y: string, position: number, index: number, bets: { position: POSITION, bet: number }[], situation: string, heroPosition: POSITION): ReactElement => {
     // Number of chips on the table
     const [chips, setChips] = useState(0);
     // Action choose by this player
     const [action, setAction] = useState(ACTION.FOLD);
 
-    const key = `[${x},${y}]}`
+    const key = `[${x},${y}]`
+
+
+
+
 
     useEffect(() => {
-        setChips(Math.floor(Math.random() * 200))
-        setAction(randomEnumValue(ACTION));
-    }, []);
+        setChips(Math.floor(bets.find(bet => bet.position === position).bet * 10))
+
+        let max = -Infinity, ind;
+        bets.forEach(v => {
+            if (max < v.bet) {
+                max = v.bet;
+                ind = v.position;
+            }
+        });
+
+        if (situation === "4-Bet" || situation === "5-Bet") {
+            ind === position ? setAction(ACTION.RAISE) : setAction(ACTION.FOLD);
+        }
+        else {
+            if ((POSITION[heroPosition as unknown as keyof typeof POSITION] + 4) % 6 < (position + 4) % 6)
+                setAction(ACTION.CALL);
+            else
+                setAction(ind === position ? ACTION.RAISE : ACTION.FOLD);
+        }
+
+    }, [bets, heroPosition, position, situation]);
 
     let dealer;
     const info = ActionInf.find(x => x.action === action);
@@ -282,6 +287,7 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: P
         dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn"
             style={PlaceDealerBtn[index]} />
     }
+
 
     return (
         <div className="player" key={key} style={{ left: x, top: y }}>
@@ -300,15 +306,15 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: P
                         <div>{Object.keys(POSITION).find(
                             key => POSITION[key] === position)}
                         </div>
-                        <div> {Math.floor(Math.random() * 1000) + 'BB'}</div>
+                        <div> {Math.floor(Math.random() * 100) + ' BB'}</div>
                     </div>
                     <div className={`col my-auto bg-grey black w-33 mx-1 p-0 ${info.color}`}>
-                        {info.print}
+                        {action !== ACTION.CALL ? info.print : "..."}
                     </div>
                 </div>
             </div>
             <div className='d-flex white justify-content-center flex-column align-items-center'>
-                <h3 className=''>{chips}</h3>
+                <h3 className=''>{chips / 10} BB</h3>
                 {ValueWithChip(chips)}
             </div>
             {dealer}
@@ -322,10 +328,14 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: P
 export const Quizz = () => {
 
     const [questions] = useContext(QuestionsContext);
-    const [quizz] = useContext(QuizzContext);
     const [nbrQuestion, setNbrQuestion] = useState(0);
     const [score, setScore] = useState(0);
     const [heroCard, setHeroCard] = useState({ sr: SUIT.CLUB, sl: 0, vr: VALUE.Q, vl: 0 });
+    const [bets, setBets] = useState([{ position: POSITION.SB, bet: 0.5 }, { position: POSITION.BB, bet: 1 },
+    { position: POSITION.UTG, bet: 0 }, { position: POSITION.HJ, bet: 0 },
+    { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]);
+    const navigate = useNavigate();
+    const [answered, setAnswered]: [boolean, any] = useState<boolean>(false);
 
     const deck = useMemo(() => new Image(), []);
     const verso = useMemo(() => new Image(), []);
@@ -334,45 +344,51 @@ export const Quizz = () => {
         verso.src = verso_img
     })
 
-    const chips = Math.floor(Math.random() * 300)
+    let chips;
     let card = [];
     let dealer;
 
-    if (questions[nbrQuestion].position === POSITION.BTN) {
-        dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn"
-            style={PlaceDealerBtn[5]} />
+    useEffect(() => {
+        if (nbrQuestion === questions.length - 1) {
+            console.log("end");
+            navigate("/home");
+        }
+        else {
+            setHeroCard(strToHand(questions[nbrQuestion].hand));
+            setBets(ScenarioRepresentation(questions[nbrQuestion].scenario));
+        }
+    }, [nbrQuestion, questions, navigate]);
+
+    if (POSITION.BTN === questions[nbrQuestion].position) {
+        dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn" style={PlaceDealerBtn[5]} />;
     }
 
-    useEffect(() => {
-        setHeroCard(strToHand(questions[nbrQuestion].hand));
-    }, [nbrQuestion, questions]);
-
     card = [Crop(deck, "hero__1", 92, 134, heroCard.vl,
-        heroCard.sl, { color: "black", cut: 110 }),
+        heroCard.sl, { color: "black", cut: 90 }),
     Crop(deck, "hero__2", 92, 134, heroCard.vr,
-        heroCard.sr, { color: "black", cut: 110 }
+        heroCard.sr, { color: "black", cut: 90 }
     )]
-
+    chips = Math.floor(bets.find(bet => bet.position === POSITION[questions[nbrQuestion].position.trim() as keyof typeof POSITION])?.bet * 10);
     return (
         <div className="quizz d-flex flex-column">
             <Header title={questions[nbrQuestion].scenario} leftText={questions[nbrQuestion].situation} leftSub={questions[nbrQuestion].position}
-                rightText={`Score: ${score}`} rightSub={`Question n°${nbrQuestion + 1}/${Math.min(questions.length, quizz.nbrQuestion)}`} titleSub={`Difficulty: ${questions[nbrQuestion].difficulty}`} />
+                rightText={`Score: ${score}`} rightSub={`Question n°${nbrQuestion + 1}/${questions.length}`} titleSub={`Difficulty: ${questions[nbrQuestion].difficulty}`} />
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
                     {players.map(
                         ({ x, y }, index) => {
-                            return Player(verso, `${x}%`, `${y}%`, (Object.keys(POSITION).findIndex((x: string) => questions[nbrQuestion].position.startsWith(x)) + index + 1) % 6, index)
+                            return Player(verso, `${x}%`, `${y}%`, (Object.values(POSITION).findIndex((x: string) => questions[nbrQuestion].position.startsWith(x)) + index + 1) % 6, index, bets, questions[nbrQuestion].situation, questions[nbrQuestion].position)
                         }
-
                     )}
                 </div>
-                <div className='Hero mx-auto'>
-                    <div className="mx-auto">
+                <div className='Hero row mx-auto'>
+                    <div className='col-3 align-self-end'> <button className='btn btn-primary  btn-lg '>next</button></div>
+                    <div className="col-6 HeroCard">
                         <div className='d-flex white justify-content-center flex-column  align-items-center'>
-                            <h3 className=''>{chips}</h3>
+                            <h3 className=''>{chips / 10 + " BB"}</h3>
                             {ValueWithChip(chips)}
                         </div>
-                        <div className="hold-cards d-flex mx-auto mt-2 justify-content-center">
+                        <div className="d-flex mx-auto mt-1 justify-content-center">
                             {card[0]}
                             {card[1]}
                         </div>
@@ -382,11 +398,12 @@ export const Quizz = () => {
                                 </div>
                             </div>
                             <div className='row'>
-                                <div> {Math.floor(Math.random() * 1000) + '$'}</div>
+                                <div> {Math.floor(Math.random() * 100) + ' BB'}</div>
                             </div>
                         </div>
                         {dealer}
                     </div >
+                    <div className='col-3 align-self-end'> <button className='btn btn-primary btn-lg '>explanation</button></div>
                 </div>
 
             </div >
