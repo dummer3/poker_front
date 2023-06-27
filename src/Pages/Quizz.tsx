@@ -335,6 +335,7 @@ export const Quizz = () => {
     { position: POSITION.UTG, bet: 0 }, { position: POSITION.HJ, bet: 0 },
     { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]);
     const navigate = useNavigate();
+    // eslint-disable-next-line
     const [answered, setAnswered]: [boolean, any] = useState<boolean>(false);
 
     const deck = useMemo(() => new Image(), []);
