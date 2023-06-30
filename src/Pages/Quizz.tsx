@@ -175,7 +175,7 @@ const ActiontoButton = (action, questions: Question_t[], setScore, setQuestion,
 export const TestAnswer = (action: any, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number, setAnswered) => {
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
     if (abr === questions[nbrQuestion].Action) {
-        setScore(score + questions[nbrQuestion][abr]);
+        setScore(score + questions[nbrQuestion].difficulty);
     }
     else {
         setScore(score - questions[nbrQuestion][abr]);
@@ -250,10 +250,6 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
     const [action, setAction] = useState(ACTION.FOLD);
 
     const key = `[${x},${y}]`
-
-
-
-
 
     useEffect(() => {
         setChips(Math.floor(bets.find(bet => bet.position === position).bet * 10))
@@ -372,11 +368,14 @@ export const Quizz = () => {
         console.log(event.code);
     };
 
-
     return (
         <div className="quizz d-flex flex-column">
-            <Header title={questions[nbrQuestion].scenario} leftText={questions[nbrQuestion].situation} leftSub={questions[nbrQuestion].position}
-                rightText={`Score: ${score}`} rightSub={`Question n°${nbrQuestion + 1}/${questions.length}`} titleSub={`Difficulty: ${questions[nbrQuestion].difficulty}`} />
+            <Header title={questions[nbrQuestion].scenario.substring(0, questions[nbrQuestion].scenario.lastIndexOf(" "))}
+                leftText={questions[nbrQuestion].situation === "OP" ? "Opening" : questions[nbrQuestion].situation}
+                leftSub={questions[nbrQuestion].position}
+                rightText={`Score: ${score}`}
+                rightSub={`Question n°${nbrQuestion + 1}/${questions.length}`}
+                titleSub={`Difficulty: ${questions[nbrQuestion].difficulty}`} />
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
                     {players.map(

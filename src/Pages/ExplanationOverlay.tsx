@@ -2,13 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { GetExplanation } from "./ApiGoogle";
 import { Question_t } from "../types/types";
 
-const mock = [["R", "F", "R", "F", "R"],
-["RC", "RF", "CF", "RF", "RF"],
-["R", "RF", "R", "CF", "R"],
-["R", "F", "F", "F", "RF"],
-["R", "R", "R", "RC", "CF"]
-];
-
 /**
  * @var ActionInfChoice - All the action (simple and complex) with the button color and their abreviation
  */
@@ -35,13 +28,12 @@ const createRangeChart = (range: string[][]) => {
 export const ExplanationOverlay = (info: { question: Question_t, setExplanation: any }) => {
 
     const [chart, setChart] = useState([]);
-    const [availableAction, setAvailableAction] = useState([]);
+
     useEffect(() => {
         GetExplanation(info.question.hand, info.question.scenario).then(result => {
             setChart(result);
-            setAvailableAction(ActionInfChoice.filter(action => result.find((row) => row.includes(action.abreviation))));
         });
-    }, [info.question, setAvailableAction])
+    }, [info.question])
 
     const wrapperRef = useRef(null);
     useOutsideAlerter(wrapperRef, info.setExplanation);
@@ -53,7 +45,13 @@ export const ExplanationOverlay = (info: { question: Question_t, setExplanation:
         </div>
         <div className="mx-5">
             <h4 className="">Details</h4>
-            {availableAction.map(infoAct => { return <div className="row my-1"><div className={`col-3 bg-${infoAct.color}`}>{infoAct.abreviation}</div> <div className="col-9">{infoAct.action}: {infoAct.abreviation === info.question.Action ? "" : "-"}{info.question[infoAct.abreviation]} points</div></div> })}
+            {ActionInfChoice.filter(infoAct => info.question[infoAct.abreviation] !== undefined).map(infoAct => {
+                return <div className="row my-1" key={`row-${infoAct.abreviation}`}>
+                    <div className={`col-3 bg-${infoAct.color}`}>{infoAct.abreviation}</div>
+                    <div className="col-9">{infoAct.action}: {infoAct.abreviation === info.question.Action ? "" : "-"}
+                        {info.question[infoAct.abreviation]} points</div>
+                </div>
+            })}
         </div>
     </div>
 }
@@ -79,5 +77,5 @@ function useOutsideAlerter(ref, setOverlay) {
             // Unbind the event listener on clean up
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [ref]);
+    }, [ref, setOverlay]);
 }
