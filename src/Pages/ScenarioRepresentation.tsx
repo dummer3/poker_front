@@ -13,9 +13,7 @@ export enum POSITION {
     BTN = 5
 }
 
-
 export const ScenarioRepresentation = (scenario: string) => {
-    console.log(scenario);
     let maxValue = 1;
     const bets = [{ position: POSITION.SB, bet: 0.5 }, { position: POSITION.BB, bet: 1 }, { position: POSITION.UTG, bet: 0 },
     { position: POSITION.HJ, bet: 0 }, { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]
@@ -38,7 +36,10 @@ export const ScenarioRepresentation = (scenario: string) => {
             maxValue = Math.floor(Math.random() * 4 + 2);
             bets.find((bet) => bet.position === POSITION[informations[0]]).bet = maxValue;
             if (informations[2] === "Blind")
-                bets.find(bet => POSITION[bet.position] === POSITION[Math.round(Math.random())]).bet = maxValue * (Math.round(Math.random()) + 1) * 2;
+                bets.find(bet => {
+                    console.log(POSITION[bet.position] + "   " + POSITION[Math.round(Math.random())]);
+                    return POSITION[bet.position] === POSITION[Math.round(Math.random())]
+                }).bet = maxValue * (Math.round(Math.random()) + 1) * 2;
             else if (informations.length === 3) {
                 btr = POSITION[informations[2]];
                 bets.find(bet => bet.position === btr).bet = maxValue * (Math.round(Math.random()) + 1) * 4;
@@ -53,7 +54,6 @@ export const ScenarioRepresentation = (scenario: string) => {
             maxValue = Math.floor(Math.random() * 4 + 4);
             bets.find(bet => bet.position === POSITION[informations[0]]).bet = maxValue;
             let str: string = informations[informations.length - 1].includes("/") ? informations[informations.length - 1].split("/")[Math.round(Math.random())] : informations[informations.length - 1];
-            console.log(str);
             btr = POSITION[str];
             bets.find(bet => bet.position === btr).bet = maxValue * (Math.round(Math.random()) + 1) * 3;
             break;

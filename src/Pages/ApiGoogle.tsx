@@ -89,6 +89,26 @@ export const getQuizz = (): Promise<Quizz_t[]> => {
 }
 
 /**
+ * Function to get a part of the range chart for a specific scenario.
+ * @param {string} hand - hand of the hero for this question
+ * @param {string} scenario - scenraio for this question 
+ * @returns {Promise<string[][]>} - array that represent a local part of the range chart
+ */
+export const GetExplanation = async (hand: string, scenario: string): Promise<string[][]> => {
+
+    return gapi.client.script.scripts.run({
+        'scriptId': process.env.REACT_APP_API_ID,
+        'resource': {
+            'function': 'getExplanation',
+            "parameters": [
+                hand, scenario
+            ],
+        },
+    }).then(ManageError).then((chart: string[][]) => { return chart });
+}
+
+
+/**
  * Function to let the user connect to his google account and give a token
  */
 export function oauthSignIn() {

@@ -10,6 +10,7 @@ import { Header } from './Header'
 import { POSITION } from './ScenarioRepresentation'
 import { ScenarioRepresentation } from './ScenarioRepresentation'
 import { useNavigate } from 'react-router-dom'
+import { ExplanationOverlay, ActionInfChoice } from './ExplanationOverlay'
 
 /**
  * Value enum for the value of a card.
@@ -69,19 +70,6 @@ enum MULTIPLE_ACTION {
     "RAISE/CALL" = "RAISE/CALL",
     "RAISE/FOLD" = "RAISE/FOLD"
 }
-
-/**
- * @var ActionInfChoice - All the action (simple and complex) with the button color and their abreviation
- */
-const ActionInfChoice: { color: string, action: string, abreviation: string }[] =
-    [
-        { color: "red", action: 'FOLD', abreviation: 'F' },
-        { color: "magenta", action: 'CALL/FOLD', abreviation: 'CF' },
-        { color: "blue", action: 'CALL', abreviation: 'C' },
-        { color: "teal", action: 'RAISE/CALL', abreviation: 'RC' },
-        { color: "green", action: 'RAISE', abreviation: 'R' },
-        { color: "yellow", action: 'RAISE/FOLD', abreviation: 'RF' },
-    ]
 
 /**
  * players position on the table
@@ -156,11 +144,21 @@ export const strToHand = (hand: string): { vl: VALUE; sl: SUIT; vr: VALUE; sr: S
     return { vl: vl, sl: sl, vr: vr, sr: sr };
 }
 
-let ActiontoButton = (actions, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => (Object.keys(actions) as Array<keyof typeof actions>).filter(x => !(parseInt(x.toString()) > 0)).map((action) => {
+const ActiontoButton = (action, questions: Question_t[], setScore, setQuestion,
+    score: number, nbrQuestion: number, setAnswered, answered: boolean) => {
+    const [color, setColor] = useState("grey");
+    useEffect(() => setColor(questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "grey" :
+        answered ?
+            questions[nbrQuestion].Action === ActionInfChoice.find(x => x.action === action).abreviation ? "green" :
+                "red" :
+            ActionInfChoice.find(x => x.action === action).color),
+        [answered]);
     return (
-        <button key={action.toString()} className={`btn btn-primary bg-${ActionInfChoice.find(x => x.action === action).color} btn-xs active col mx-3 mb-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "disabled" : ""}`}
-            onClick={(e) => { TestAnswer(action, questions, setScore, setQuestion, score, nbrQuestion) }}> {action.toString()} </button>);
-});
+        <button key={action.toString()} className={`btn btn-primary btn-xs bg-${color} active col mx-3 mb-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined || answered ? "disabled" : ""}`}
+            onClick={(e) => {
+                TestAnswer(action, questions, setScore, setQuestion, score, nbrQuestion, setAnswered)
+            }}> {action.toString()} </button >);
+}
 
 
 /**
@@ -174,7 +172,7 @@ let ActiontoButton = (actions, questions: Question_t[], setScore, setQuestion, s
  * @param {number} nbrQuestion - the actual question number.
  * @returns none.
  */
-export const TestAnswer = (action: any, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number) => {
+export const TestAnswer = (action: any, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number, setAnswered) => {
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
     if (abr === questions[nbrQuestion].Action) {
         setScore(score + questions[nbrQuestion][abr]);
@@ -183,7 +181,7 @@ export const TestAnswer = (action: any, questions: Question_t[], setScore, setQu
         setScore(score - questions[nbrQuestion][abr]);
     }
 
-    setQuestion(nbrQuestion + 1);
+    setAnswered(true);
 }
 
 /**
@@ -326,7 +324,6 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
  * @returns {ReactElement} - The quiz page
  */
 export const Quizz = () => {
-
     const [questions] = useContext(QuestionsContext);
     const [nbrQuestion, setNbrQuestion] = useState(0);
     const [score, setScore] = useState(0);
@@ -335,8 +332,8 @@ export const Quizz = () => {
     { position: POSITION.UTG, bet: 0 }, { position: POSITION.HJ, bet: 0 },
     { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]);
     const navigate = useNavigate();
-    // eslint-disable-next-line
     const [answered, setAnswered]: [boolean, any] = useState<boolean>(false);
+    const [explanation, setExplanation]: [boolean, any] = useState<boolean>(false);
 
     const deck = useMemo(() => new Image(), []);
     const verso = useMemo(() => new Image(), []);
@@ -351,7 +348,6 @@ export const Quizz = () => {
 
     useEffect(() => {
         if (nbrQuestion === questions.length - 1) {
-            console.log("end");
             navigate("/home");
         }
         else {
@@ -360,7 +356,8 @@ export const Quizz = () => {
         }
     }, [nbrQuestion, questions, navigate]);
 
-    if (POSITION.BTN === questions[nbrQuestion].position) {
+    if (POSITION[5] === questions[nbrQuestion].position) {
+        console.log("dealer");
         dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn" style={PlaceDealerBtn[5]} />;
     }
 
@@ -370,6 +367,12 @@ export const Quizz = () => {
         heroCard.sr, { color: "black", cut: 90 }
     )]
     chips = Math.floor(bets.find(bet => bet.position === POSITION[questions[nbrQuestion].position.trim() as keyof typeof POSITION])?.bet * 10);
+
+    const keyDownHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        console.log(event.code);
+    };
+
+
     return (
         <div className="quizz d-flex flex-column">
             <Header title={questions[nbrQuestion].scenario} leftText={questions[nbrQuestion].situation} leftSub={questions[nbrQuestion].position}
@@ -383,7 +386,7 @@ export const Quizz = () => {
                     )}
                 </div>
                 <div className='Hero row mx-auto'>
-                    <div className='col-3 align-self-end'> <button className='btn btn-primary  btn-lg '>next</button></div>
+                    {answered ? <div className='col-3 align-self-end'> <button className='btn btn-primary  btn-lg' onClick={() => { setAnswered(false); setNbrQuestion(nbrQuestion + 1) }}>NEXT</button></div> : ""}
                     <div className="col-6 HeroCard">
                         <div className='d-flex white justify-content-center flex-column  align-items-center'>
                             <h3 className=''>{chips / 10 + " BB"}</h3>
@@ -404,18 +407,20 @@ export const Quizz = () => {
                         </div>
                         {dealer}
                     </div >
-                    <div className='col-3 align-self-end'> <button className='btn btn-primary btn-lg '>explanation</button></div>
+                    {answered ? <div className='col-3 align-self-end'> <button className='btn btn-primary btn-lg' onClick={() => setExplanation(true)}>EXPLANATION</button></div> : ""}
                 </div>
 
             </div >
             <div className='Answer grid justify-content-around mt-3 mx-5'>
                 <div className='row'>
-                    {ActiontoButton(ACTION, questions, setScore, setNbrQuestion, score, nbrQuestion)}
+                    {(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => ActiontoButton(action, questions, setScore, setNbrQuestion, score, nbrQuestion, setAnswered, answered))}
                 </div>
                 <div className='row'>
-                    {ActiontoButton(MULTIPLE_ACTION, questions, setScore, setNbrQuestion, score, nbrQuestion)}
+                    {(Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => ActiontoButton(action, questions, setScore, setNbrQuestion, score, nbrQuestion, setAnswered, answered))}
                 </div>
             </div>
+
+            {explanation ? <ExplanationOverlay question={questions[nbrQuestion]} setExplanation={setExplanation} /> : <></>}
         </div >
 
     );

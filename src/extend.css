@@ -64,6 +64,10 @@
     width: 64%;
 }
 
+.col-2 {
+    width: 15%;
+}
+
 .board {
     background-color: #039a2dcc;
     border-radius: 20%;
@@ -184,4 +188,20 @@ input[type="checkbox"] {
     --bs-btn-padding-x: 1rem;
     --bs-btn-font-size: 1.20rem;
     --bs-btn-border-radius: 0.5rem;
+}
+
+.btn.disabled {
+    background-color: #444444;
+    opacity: 0.80;
+}
+
+.ExplanationOverlay {
+    box-sizing: border-box;
+    height: 90vh;
+    width: 25vw;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+    border: 5px ridge white;
 }
