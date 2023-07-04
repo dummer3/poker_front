@@ -11,8 +11,8 @@ import { useState } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
-  const [quizz, setQuizz] = useState<Quizz_t>({ nbrQuestion: 10, positions: [], situations: [], scenarios: [], difficulty: 10, id: 0 });
-  const [questions, setQuestions] = useState<Question_t[]>([{ hand: "AAo", difficulty: 10, R: 0, F: 0, C: 0, RC: 0, CF: 0, RF: 0, Action: "R", situation: "none", position: "none", scenario: "none" }]);
+  const [quizz, setQuizz] = useState<Quizz_t>({ nbrQuestion: -1, positions: [], situations: [], scenarios: [], difficulty: -1 });
+  const [questions, setQuestions] = useState<Question_t[]>([{ hand: "AAo", difficulty: -1, R: 0, F: 0, C: 0, RC: 0, CF: 0, RF: 0, Action: "R", situation: "none", position: "none", scenario: "none" }]);
 
   return (
     <div className="App">

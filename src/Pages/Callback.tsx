@@ -41,12 +41,9 @@ export const Callback = () => {
         params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
     }
     if (Object.keys(params).length > 0) {
-        //localStorage.setItem('oauth2-test-params', JSON.stringify(params));
-        if (params['state'] && params['state'] === 'pass-through value') {
-            console.log(params['access_token']);
-        }
+        localStorage.setItem('oauth2-test-params', JSON.stringify(params));
     }
 
-    setTimeout(() => { navigate("/home") }, 1000);
+    setTimeout(() => { console.log(params); navigate("/home") }, 1000);
     return (<h1>Authentification ongoing</h1>);
 }

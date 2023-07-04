@@ -34,20 +34,22 @@ export const ScenarioRepresentation = (scenario: string) => {
             break;
         case "4-Bet":
             maxValue = Math.floor(Math.random() * 4 + 2);
+            const newBet = maxValue * (Math.round(Math.random()) + 1) * 4;
             bets.find((bet) => bet.position === POSITION[informations[0]]).bet = maxValue;
-            if (informations[2] === "Blind")
+            if (informations[2] === "Blind") {
+                const adv = Math.round(Math.random());
                 bets.find(bet => {
-                    console.log(POSITION[bet.position] + "   " + POSITION[Math.round(Math.random())]);
-                    return POSITION[bet.position] === POSITION[Math.round(Math.random())]
-                }).bet = maxValue * (Math.round(Math.random()) + 1) * 2;
+                    return POSITION[bet.position] === POSITION[adv]
+                }).bet = newBet;
+            }
             else if (informations.length === 3) {
                 btr = POSITION[informations[2]];
-                bets.find(bet => bet.position === btr).bet = maxValue * (Math.round(Math.random()) + 1) * 4;
+                bets.find(bet => bet.position === btr).bet = newBet;
             }
             else {
                 let value: number = POSITION[informations[0]];
-                value = informations[1] === "OOP" ? Math.round(Math.random()) * (value - 1) : value + Math.round(1 + Math.random() * (4 - value));
-                bets.find(bet => bet.position === value).bet = maxValue * (Math.round(Math.random()) + 1) * 4;
+                value = informations[1] === "IP" ? Math.round(Math.random()) * (value - 1) : value + Math.round(1 + Math.random() * (4 - value));
+                bets.find(bet => bet.position === value).bet = newBet;
             }
             break;
         case "5-Bet":

@@ -11,7 +11,7 @@ import { POSITION } from './ScenarioRepresentation'
 import { ScenarioRepresentation } from './ScenarioRepresentation'
 import { useNavigate } from 'react-router-dom'
 import { ExplanationOverlay, ActionInfChoice } from './ExplanationOverlay'
-
+import { GetExplanation } from "./ApiGoogle";
 /**
  * Value enum for the value of a card.
  * @readonly
@@ -152,7 +152,7 @@ const ActiontoButton = (action, questions: Question_t[], setScore, setQuestion,
             questions[nbrQuestion].Action === ActionInfChoice.find(x => x.action === action).abreviation ? "green" :
                 "red" :
             ActionInfChoice.find(x => x.action === action).color),
-        [answered]);
+        [answered, questions, action, nbrQuestion]);
     return (
         <button key={action.toString()} className={`btn btn-primary btn-xs bg-${color} active col mx-3 mb-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined || answered ? "disabled" : ""}`}
             onClick={(e) => {
@@ -274,14 +274,7 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
 
     }, [bets, heroPosition, position, situation]);
 
-    let dealer;
     const info = ActionInf.find(x => x.action === action);
-
-    if (position === POSITION.BTN) {
-        dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn"
-            style={PlaceDealerBtn[index]} />
-    }
-
 
     return (
         <div className="player" key={key} style={{ left: x, top: y }}>
@@ -311,7 +304,8 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
                 <h3 className=''>{chips / 10} BB</h3>
                 {ValueWithChip(chips)}
             </div>
-            {dealer}
+            {position === POSITION.BTN && <img src={dealer_img} alt='dealer-btn' className="dealer-btn"
+                style={PlaceDealerBtn[index]} />}
         </div>);
 }
 
@@ -340,7 +334,6 @@ export const Quizz = () => {
 
     let chips;
     let card = [];
-    let dealer;
 
     useEffect(() => {
         if (nbrQuestion === questions.length - 1) {
@@ -352,10 +345,13 @@ export const Quizz = () => {
         }
     }, [nbrQuestion, questions, navigate]);
 
-    if (POSITION[5] === questions[nbrQuestion].position) {
-        console.log("dealer");
-        dealer = <img src={dealer_img} alt='dealer-btn' className="dealer-btn" style={PlaceDealerBtn[5]} />;
-    }
+    const [chart, setChart] = useState([]);
+
+    useEffect(() => {
+        GetExplanation(questions[nbrQuestion].hand, questions[nbrQuestion].scenario).then(result => {
+            setChart(result);
+        });
+    }, [nbrQuestion, questions])
 
     card = [Crop(deck, "hero__1", 92, 134, heroCard.vl,
         heroCard.sl, { color: "black", cut: 90 }),
@@ -363,10 +359,6 @@ export const Quizz = () => {
         heroCard.sr, { color: "black", cut: 90 }
     )]
     chips = Math.floor(bets.find(bet => bet.position === POSITION[questions[nbrQuestion].position.trim() as keyof typeof POSITION])?.bet * 10);
-
-    const keyDownHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        console.log(event.code);
-    };
 
     return (
         <div className="quizz d-flex flex-column">
@@ -404,7 +396,7 @@ export const Quizz = () => {
                                 <div> {Math.floor(Math.random() * 100) + ' BB'}</div>
                             </div>
                         </div>
-                        {dealer}
+                        {POSITION[5] === questions[nbrQuestion].position && <img src={dealer_img} alt='dealer-btn' className="dealer-btn" style={PlaceDealerBtn[5]} />}
                     </div >
                     {answered ? <div className='col-3 align-self-end'> <button className='btn btn-primary btn-lg' onClick={() => setExplanation(true)}>EXPLANATION</button></div> : ""}
                 </div>
@@ -419,8 +411,7 @@ export const Quizz = () => {
                 </div>
             </div>
 
-            {explanation ? <ExplanationOverlay question={questions[nbrQuestion]} setExplanation={setExplanation} /> : <></>}
+            {explanation ? <ExplanationOverlay question={questions[nbrQuestion]} setExplanation={setExplanation} chart={chart} /> : <></>}
         </div >
-
     );
 }

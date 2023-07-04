@@ -2,7 +2,7 @@ import { Question_t, Quizz_t } from '../types/types';
 
 declare var gapi: any
 
-const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets';
+const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/script.external_request openid profile';
 
 const ManageError = (response) => {
     const result = response.result;
@@ -47,7 +47,6 @@ export const getScenarios = (info: { positions: string[], situations: string[] }
  * @returns {Promise<Question_t[]>} - list of all available scenarios
  */
 export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
-
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
@@ -65,12 +64,11 @@ export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
  * @returns {Promise<void>} - nothing useful
  */
 export const saveQuizz = (quizz: Question_t): Promise<void> => {
-    console.log(quizz);
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'newQuizz',
-            "parameters": quizz
+            "parameters": [quizz, JSON.parse(localStorage.getItem('oauth2-test-params'))["access_token"]]
         }
     }).then(ManageError);
 }
@@ -83,7 +81,10 @@ export const getQuizz = (): Promise<Quizz_t[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
-            'function': 'getQuizz'
+            'function': 'getQuizz',
+            'parameters': [
+                JSON.parse(localStorage.getItem('oauth2-test-params'))["access_token"]
+            ]
         }
     }).then(ManageError).then((value: Quizz_t[]) => { return value });
 }
@@ -126,7 +127,7 @@ export function oauthSignIn() {
         'redirect_uri': 'http://127.0.0.1:3000/callback',
         'response_type': 'token',
         'scope': SCOPES,
-        //'include_granted_scopes': 'true',
+        'include_granted_scopes': 'true',
         'state': 'pass-through value'
     };
 

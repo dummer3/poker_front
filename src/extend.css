@@ -205,3 +205,20 @@ input[type="checkbox"] {
     z-index: 10;
     border: 5px ridge white;
 }
+
+.border-3 {
+    border-width: 3px !important;
+}
+
+@keyframes hover-change-color {
+    to {
+        background-color: #CBCBCB;
+    }
+}
+
+.hover:hover {
+    animation-name: hover-change-color;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+}

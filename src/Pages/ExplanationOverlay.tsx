@@ -1,5 +1,4 @@
-import { useEffect, useState, useRef } from "react";
-import { GetExplanation } from "./ApiGoogle";
+import { useEffect, useRef } from "react";
 import { Question_t } from "../types/types";
 
 /**
@@ -19,21 +18,14 @@ const createRangeChart = (range: string[][]) => {
     return <div className="container">
         {range.map((row, r) => {
             return <div className="row my-1" key={`row-${row[0]}`}>
-                {row.map((col, c) => { const info = ActionInfChoice.find(x => x.abreviation === col); return <div className={`col-2 bg-${info ? info.color : "black"}`} key={`col-${range[0][c]}`}> {col} </div> })}
+                {row.map((col, c) => { console.log(range[0][c] + "   " + row[0]); const info = ActionInfChoice.find(x => x.abreviation === col); return <div className={`col-2 bg-${info ? info.color : "black"} ${range[0][c] === row[0] && c !== 0 ? "border border-3 border-white" : ""}`} key={`col-${range[0][c]}`}> {col} </div> })}
             </div>
         })}
     </div>
 }
 
-export const ExplanationOverlay = (info: { question: Question_t, setExplanation: any }) => {
+export const ExplanationOverlay = (info: { question: Question_t, setExplanation: any, chart: string[][] }) => {
 
-    const [chart, setChart] = useState([]);
-
-    useEffect(() => {
-        GetExplanation(info.question.hand, info.question.scenario).then(result => {
-            setChart(result);
-        });
-    }, [info.question])
 
     const wrapperRef = useRef(null);
     useOutsideAlerter(wrapperRef, info.setExplanation);
@@ -41,7 +33,7 @@ export const ExplanationOverlay = (info: { question: Question_t, setExplanation:
     return <div ref={wrapperRef} className="ExplanationOverlay bg-dark d-flex flex-column white">
         <div className="mx-2">
             <h4 className="">Range Chart</h4>
-            {createRangeChart(chart)}
+            {createRangeChart(info.chart)}
         </div>
         <div className="mx-5">
             <h4 className="">Details</h4>

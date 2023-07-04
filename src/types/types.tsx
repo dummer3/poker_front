@@ -30,15 +30,12 @@ export type Question_t = {
 
 /**
  * @type - Type to represent a quiz
- * @var {number} id -  
  * @var {number} difficulty -
  * @var {string} scenarios - 
  * @var {string} situations -
  * @var {string} positions - 
 */
 export type Quizz_t = {
-    /**id of this quiz   */
-    id: number,
     /** number of question in this quiz */
     nbrQuestion: number,
     /** difficulty of this question */

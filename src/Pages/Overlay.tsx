@@ -46,8 +46,8 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
             </div>
             {show && <div className='mx-auto'>
                 {/*Type button because by default it's submit */}
-                <button type="button" className='btn btn-xs btn-primary me-2' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }}  >Select all</button>
-                <button type="button" className='btn btn-xs btn-primary' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button></div>}
+                <button type="button" className='btn btn-primary me-2 py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }}  >Select all</button>
+                <button type="button" className='btn btn-primary py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button></div>}
 
         </div>
         {show && <div className='content d-flex flex-wrap w-100 flex-overlay justify-content-center'>
@@ -100,8 +100,8 @@ export const ScenarioOverlay = (info: { title: string, scenarios: string[] }) =>
                 <p className='bi bi-arrow-right-circle-fill teal me-auto ms-2'></p>
             </div>
             {show && <div className='mx-auto'>
-                <button type="button" className='btn btn-xs btn-primary me-2' onClick={(e) => { e.preventDefault(); let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }} >Select all</button>
-                <button type="button" className='btn btn-xs btn-primary' onClick={(e) => { e.preventDefault(); let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button></div>}
+                <button type="button" className='btn btn-primary me-2 py-1' onClick={(e) => { e.preventDefault(); let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }} >Select all</button>
+                <button type="button" className='btn btn-primary py-1' onClick={(e) => { e.preventDefault(); let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button></div>}
 
         </div>
         {show && <div className='content d-flex flex-wrap w-100 flex-overlay justify-content-center'>
