@@ -370,13 +370,13 @@ export const Quiz = () => {
     useEffect(() => {
         setChips(Math.floor(bets.find(bet =>
             bet.position === POSITION[question?.position.trim() as keyof typeof POSITION])?.bet * 10))
-    }, [bets])
+    }, [bets, question])
 
     useEffect(() => {
         if (question)
             setButton([(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} setQuestion={setNbrQuestion} score={score} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} />),
             (Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} setQuestion={setNbrQuestion} score={score} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} />)]);
-    }, [question, answered]);
+    }, [question, answered, nbrQuestion, score]);
 
     useEffect(() => {
         setCards([<Crop deck={deck} k="hero__1" initialW={92} initialH={134} value={heroCard.vl}

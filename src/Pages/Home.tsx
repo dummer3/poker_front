@@ -61,7 +61,7 @@ export const Home = () => {
                     case 1: return q1.nbrQuestion - q2.nbrQuestion;
                     case 2: return q2.nbrQuestion - q1.nbrQuestion;
                     case 3: return q1.difficultyMin - q2.difficultyMin;
-                    case 4: return q2.difficultyMax - q1.difficultyMax;
+                    default: return q2.difficultyMax - q1.difficultyMax;
                 }
             }); return temp;
         })

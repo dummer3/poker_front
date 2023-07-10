@@ -42,7 +42,7 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
         <div className='header d-flex '>
             <div className="d-flex" onClick={() => { setShow(!show) }}>
                 <h5>{info.title}</h5>
-                <h5 className={`bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
+                <p className={`h5 bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
             </div>
             {show && <div className='mx-auto'>
                 {/*Type button because by default it's submit */}
@@ -97,7 +97,7 @@ export const ScenarioOverlay = (info: { title: string, scenarios: string[] }) =>
         <div className='header d-flex '>
             <div className="d-flex" onClick={() => { setShow(!show) }}>
                 <h5>{info.title}</h5>
-                <h5 className={`bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
+                <p className={`h5 bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
             </div>
             {show && <div className='mx-auto'>
                 <button type="button" className='btn btn-primary me-2 py-1' onClick={(e) => { e.preventDefault(); let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }} >Select all</button>
