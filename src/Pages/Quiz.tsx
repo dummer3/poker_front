@@ -4,7 +4,7 @@ import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
-import { QuestionsContext } from '../context/QuizzContext'
+import { QuestionsContext } from '../context/QuizContext'
 import { Question_t } from '../types/types'
 import { Header } from './Header'
 import { POSITION } from './ScenarioRepresentation'
@@ -12,13 +12,15 @@ import { ScenarioRepresentation } from './ScenarioRepresentation'
 import { useNavigate } from 'react-router-dom'
 import { ExplanationOverlay, ActionInfChoice } from './ExplanationOverlay'
 import { GetExplanation } from "./ApiGoogle";
+
 /**
  * Value enum for the value of a card.
  * @readonly
  * @private
  * @enum {number}
  */
-enum VALUE {
+
+export enum VALUE {
     _2 = 1,
     _3 = 2,
     _4 = 3,
@@ -144,19 +146,18 @@ export const strToHand = (hand: string): { vl: VALUE; sl: SUIT; vr: VALUE; sr: S
     return { vl: vl, sl: sl, vr: vr, sr: sr };
 }
 
-const ActiontoButton = (action, questions: Question_t[], setScore, setQuestion,
-    score: number, nbrQuestion: number, setAnswered, answered: boolean) => {
+const ActiontoButton = ({ action, question, setScore, setQuestion, score, nbrQuestion, setAnswered, answered }) => {
     const [color, setColor] = useState("grey");
-    useEffect(() => setColor(questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "grey" :
+    useEffect(() => setColor(question[ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "grey" :
         answered ?
-            questions[nbrQuestion].Action === ActionInfChoice.find(x => x.action === action).abreviation ? "green" :
+            question?.Action === ActionInfChoice.find(x => x.action === action).abreviation ? "green" :
                 "red" :
             ActionInfChoice.find(x => x.action === action).color),
-        [answered, questions, action, nbrQuestion]);
+        [answered, question, action, nbrQuestion]);
     return (
-        <button key={action.toString()} className={`btn btn-primary btn-xs bg-${color} active col mx-3 mb-1 ${questions[nbrQuestion][ActionInfChoice.find(x => x.action === action).abreviation] === undefined || answered ? "disabled" : ""}`}
+        <button key={action.toString()} className={`btn btn-primary btn-xs bg-${color} active col mx-3 mb-1 ${question[ActionInfChoice.find(x => x.action === action).abreviation] === undefined || answered ? "disabled" : ""}`}
             onClick={(e) => {
-                TestAnswer(action, questions, setScore, setQuestion, score, nbrQuestion, setAnswered)
+                TestAnswer(action, question, setScore, setQuestion, score, nbrQuestion, setAnswered)
             }}> {action.toString()} </button >);
 }
 
@@ -172,17 +173,18 @@ const ActiontoButton = (action, questions: Question_t[], setScore, setQuestion,
  * @param {number} nbrQuestion - the actual question number.
  * @returns none.
  */
-export const TestAnswer = (action: any, questions: Question_t[], setScore, setQuestion, score: number, nbrQuestion: number, setAnswered) => {
+export const TestAnswer = (action: any, question: Question_t, setScore, setQuestion, score: number, nbrQuestion: number, setAnswered) => {
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
-    if (abr === questions[nbrQuestion].Action) {
-        setScore(score + questions[nbrQuestion].difficulty);
+    if (abr === question?.Action) {
+        setScore(score + question?.difficulty);
     }
     else {
-        setScore(score - questions[nbrQuestion][abr]);
+        setScore(score - question[abr]);
     }
-
     setAnswered(true);
 }
+
+
 
 /**
  * @function Crop - Function to crop an card image from a spritesheet and render the result in a canvas
@@ -195,7 +197,7 @@ export const TestAnswer = (action: any, questions: Question_t[], setScore, setQu
  * @param {{ cut: number, color: number }} info - information about the presentation of the new canvas
  * @returns {HTMLCanvasElement} - canvas of the crop image
  */
-export const Crop = (deck: HTMLImageElement, key: string, initialW: number, initialH: number, value: number, suit: number, info: { cut: number, color: string }) => {
+export const Crop = (info: { deck: HTMLImageElement, k: string, initialW: number, initialH: number, value: number, suit: number, cut: number, color: string }) => {
 
     // if the crop image in load or not
     const [isLoaded, setIsLoaded] = useState(false);
@@ -209,29 +211,29 @@ export const Crop = (deck: HTMLImageElement, key: string, initialW: number, init
             setIsLoaded(true);
         };
 
-        if (deck.complete) {
+        if (info.deck.complete) {
             onLoad();
         } else {
-            deck.addEventListener('load', onLoad);
+            info.deck.addEventListener('load', onLoad);
         }
 
         return () => {
-            deck.removeEventListener('load', onLoad);
+            info.deck.removeEventListener('load', onLoad);
         };
-    }, [deck, isLoaded, value, suit]);
+    }, [info.deck, isLoaded, info.value, info.suit]);
 
     // When the image is finaly load and the canvas ready
     useEffect(() => {
         if (isLoaded && canvasRef.current) {
             const canvas = canvasRef.current;
             const context = canvas.getContext('2d');
-            context.drawImage(deck, value * 92, suit * 134, initialW, initialH, 0, 0, 92, 134);
+            context.drawImage(info.deck, info.value * 92, info.suit * 134, info.initialW, info.initialH, 0, 0, 92, 134);
         }
     });
 
     // return the canvas
     return (
-        <canvas className={`card ${info.color}-img`} ref={canvasRef} width={92} height={info.cut} key={key} />
+        <canvas className={`card ${info.color}-img`} ref={canvasRef} width={92} height={info.cut} key={info.k} />
     );
 };
 
@@ -246,6 +248,7 @@ export const Crop = (deck: HTMLImageElement, key: string, initialW: number, init
 export const Player = (card: HTMLImageElement, x: string, y: string, position: number, index: number, bets: { position: POSITION, bet: number }[], situation: string, heroPosition: POSITION): ReactElement => {
     // Number of chips on the table
     const [chips, setChips] = useState(0);
+    const [stock, setStock] = useState(0);
     // Action choose by this player
     const [action, setAction] = useState(ACTION.FOLD);
 
@@ -253,7 +256,7 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
 
     useEffect(() => {
         setChips(Math.floor(bets.find(bet => bet.position === position).bet * 10))
-
+        setStock(Math.floor(Math.random() * 100))
         let max = -Infinity, ind;
         bets.forEach(v => {
             if (max < v.bet) {
@@ -280,12 +283,16 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
         <div className="player" key={key} style={{ left: x, top: y }}>
 
             <div className="hold-cards d-flex m-auto justify-content-center">
-                {Crop(card, `${key}__1`, 600, 840,
-                    0,
-                    0, info)}
-                {Crop(card, `${key}__2`, 600, 840,
-                    0,
-                    0, info)}
+                {<Crop deck={card} k={`${key}__1`} initialW={600} initialH={840}
+                    suit={0}
+                    value={0}
+                    cut={info.cut}
+                    color={info.color} />}
+                {<Crop deck={card} k={`${key}__2`} initialW={600} initialH={840}
+                    suit={0}
+                    value={0}
+                    cut={info.cut}
+                    color={info.color} />}
             </div>
             <div className='container Information bg-black white'>
                 <div className="row">
@@ -293,7 +300,7 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
                         <div>{Object.keys(POSITION).find(
                             key => POSITION[key] === position)}
                         </div>
-                        <div> {Math.floor(Math.random() * 100) + ' BB'}</div>
+                        <div> {stock + ' BB'}</div>
                     </div>
                     <div className={`col my-auto bg-grey black w-33 mx-1 p-0 ${info.color}`}>
                         {action !== ACTION.CALL ? info.print : "..."}
@@ -313,7 +320,7 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
  * 
  * @returns {ReactElement} - The quiz page
  */
-export const Quizz = () => {
+export const Quiz = () => {
     const [questions] = useContext(QuestionsContext);
     const [nbrQuestion, setNbrQuestion] = useState(0);
     const [score, setScore] = useState(0);
@@ -321,9 +328,16 @@ export const Quizz = () => {
     const [bets, setBets] = useState([{ position: POSITION.SB, bet: 0.5 }, { position: POSITION.BB, bet: 1 },
     { position: POSITION.UTG, bet: 0 }, { position: POSITION.HJ, bet: 0 },
     { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]);
+
+    const [stock, setStock] = useState(0);
     const navigate = useNavigate();
     const [answered, setAnswered]: [boolean, any] = useState<boolean>(false);
     const [explanation, setExplanation]: [boolean, any] = useState<boolean>(false);
+    const [chips, setChips] = useState(0);
+    const [cards, setCards] = useState([]);
+    const [button, setButton] = useState([]);
+
+    const [question, setQuestion] = useState<Question_t>();
 
     const deck = useMemo(() => new Image(), []);
     const verso = useMemo(() => new Image(), []);
@@ -332,47 +346,61 @@ export const Quizz = () => {
         verso.src = verso_img
     })
 
-    let chips;
-    let card = [];
-
     useEffect(() => {
-        if (nbrQuestion === questions.length - 1) {
+        if (nbrQuestion === questions.length) {
             navigate("/home");
         }
         else {
-            setHeroCard(strToHand(questions[nbrQuestion].hand));
-            setBets(ScenarioRepresentation(questions[nbrQuestion].scenario));
+            setQuestion(questions[nbrQuestion]);
         }
     }, [nbrQuestion, questions, navigate]);
 
-    const [chart, setChart] = useState([]);
+    useEffect(() => {
+        console.log(question);
+        if (question) {
+            setHeroCard(strToHand(question?.hand));
+            setBets(ScenarioRepresentation(question?.scenario));
+            GetExplanation(question?.hand, question?.scenario).then(result => {
+                setChart(result);
+            })
+            setStock(Math.floor(Math.random() * 100));
+        }
+    }, [question])
 
     useEffect(() => {
-        GetExplanation(questions[nbrQuestion].hand, questions[nbrQuestion].scenario).then(result => {
-            setChart(result);
-        });
-    }, [nbrQuestion, questions])
+        setChips(Math.floor(bets.find(bet =>
+            bet.position === POSITION[question?.position.trim() as keyof typeof POSITION])?.bet * 10))
+    }, [bets])
 
-    card = [Crop(deck, "hero__1", 92, 134, heroCard.vl,
-        heroCard.sl, { color: "black", cut: 90 }),
-    Crop(deck, "hero__2", 92, 134, heroCard.vr,
-        heroCard.sr, { color: "black", cut: 90 }
-    )]
-    chips = Math.floor(bets.find(bet => bet.position === POSITION[questions[nbrQuestion].position.trim() as keyof typeof POSITION])?.bet * 10);
+    useEffect(() => {
+        if (question)
+            setButton([(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} setQuestion={setNbrQuestion} score={score} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} />),
+            (Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} setQuestion={setNbrQuestion} score={score} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} />)]);
+    }, [question, answered]);
+
+    useEffect(() => {
+        setCards([<Crop deck={deck} k="hero__1" initialW={92} initialH={134} value={heroCard.vl}
+            suit={heroCard.sl} color="black" cut={90} />,
+        <Crop deck={deck} k="hero__2" initialW={92} initialH={134} value={heroCard.vr}
+            suit={heroCard.sr} color="black" cut={90} />
+        ]);
+    }, [heroCard, deck])
+
+    const [chart, setChart] = useState([]);
 
     return (
-        <div className="quizz d-flex flex-column">
-            <Header title={questions[nbrQuestion].scenario.substring(0, questions[nbrQuestion].scenario.lastIndexOf(" "))}
-                leftText={questions[nbrQuestion].situation === "OP" ? "Opening" : questions[nbrQuestion].situation}
-                leftSub={questions[nbrQuestion].position}
+        <div className="quiz d-flex flex-column">
+            <Header title={question?.scenario.substring(0, question?.scenario.lastIndexOf(" "))}
+                leftText={question?.situation === "OP" ? "Opening" : question?.situation}
+                leftSub={question?.position}
                 rightText={`Score: ${score}`}
                 rightSub={`Question n°${nbrQuestion + 1}/${questions.length}`}
-                titleSub={`Difficulty: ${questions[nbrQuestion].difficulty}`} />
+                titleSub={`Difficulty: ${question?.difficulty}`} />
             <div className="board m-auto my-5">
                 <div className='villain inline-layered'>
                     {players.map(
                         ({ x, y }, index) => {
-                            return Player(verso, `${x}%`, `${y}%`, (Object.values(POSITION).findIndex((x: string) => questions[nbrQuestion].position.startsWith(x)) + index + 1) % 6, index, bets, questions[nbrQuestion].situation, questions[nbrQuestion].position)
+                            return Player(verso, `${x}%`, `${y}%`, (Object.values(POSITION).findIndex((x: string) => question?.position.startsWith(x)) + index + 1) % 6, index, bets, question?.situation, POSITION[question?.position])
                         }
                     )}
                 </div>
@@ -384,19 +412,19 @@ export const Quizz = () => {
                             {ValueWithChip(chips)}
                         </div>
                         <div className="d-flex mx-auto mt-1 justify-content-center">
-                            {card[0]}
-                            {card[1]}
+                            {cards[0]}
+                            {cards[1]}
                         </div>
                         <div className='container Information bg-black white p-auto'>
                             <div className="row">
-                                <div>{questions[nbrQuestion].position}
+                                <div>{question?.position}
                                 </div>
                             </div>
                             <div className='row'>
-                                <div> {Math.floor(Math.random() * 100) + ' BB'}</div>
+                                <div> {stock + ' BB'}</div>
                             </div>
                         </div>
-                        {POSITION[5] === questions[nbrQuestion].position && <img src={dealer_img} alt='dealer-btn' className="dealer-btn" style={PlaceDealerBtn[5]} />}
+                        {POSITION[5] === question?.position && <img src={dealer_img} alt='dealer-btn' className="dealer-btn" style={PlaceDealerBtn[5]} />}
                     </div >
                     {answered ? <div className='col-3 align-self-end'> <button className='btn btn-primary btn-lg' onClick={() => setExplanation(true)}>EXPLANATION</button></div> : ""}
                 </div>
@@ -404,10 +432,10 @@ export const Quizz = () => {
             </div >
             <div className='Answer grid justify-content-around mt-3 mx-5'>
                 <div className='row'>
-                    {(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => ActiontoButton(action, questions, setScore, setNbrQuestion, score, nbrQuestion, setAnswered, answered))}
+                    {button[0]}
                 </div>
                 <div className='row'>
-                    {(Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => ActiontoButton(action, questions, setScore, setNbrQuestion, score, nbrQuestion, setAnswered, answered))}
+                    {button[1]}
                 </div>
             </div>
 

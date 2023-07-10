@@ -1,28 +1,34 @@
-import { Question_t, Quizz_t } from '../types/types';
+import { Question_t, Quiz_t } from '../types/types';
 
 declare var gapi: any
 
 const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/script.external_request openid profile';
 
 const ManageError = (response) => {
-    const result = response.result;
-    if (result.error && result.error.status) {
-        console.log('Error calling API:' + result.error.status);
-    } else if (result.error) {
-        const error = result.error.details[0];
-        console.log('Script error message: ' + error.errorMessage);
-        if (error.scriptStackTraceElements) {
-            // There may not be a stacktrace if the script didn't start executing.
-            console.log('Script error stacktrace:');
-            for (let i = 0; i < error.scriptStackTraceElements.length; i++) {
-                const trace = error.scriptStackTraceElements[i];
-                console.log('\t' + trace.function + ':' + trace.lineNumber);
+    try {
+        const result = response.result;
+        if (result.error && result.error.status) {
+            console.log('Error calling API:' + result.error.status);
+        } else if (result.error) {
+            const error = result.error.details[0];
+            console.log('Script error message: ' + error.errorMessage);
+            if (error.scriptStackTraceElements) {
+                // There may not be a stacktrace if the script didn't start executing.
+                console.log('Script error stacktrace:');
+                for (let i = 0; i < error.scriptStackTraceElements.length; i++) {
+                    const trace = error.scriptStackTraceElements[i];
+                    console.log('\t' + trace.function + ':' + trace.lineNumber);
+                }
             }
-        }
 
+        }
+        return result.response.result;
+    }
+    catch
+    {
+        console.log("erreur lors de l'appel API, veuillez attendre")
     }
 
-    return result.response.result;
 }
 /**
  * Function to get all available scenarios from positions and scenarios defined
@@ -43,16 +49,16 @@ export const getScenarios = (info: { positions: string[], situations: string[] }
 
 /**
  * Function to get the questions of the quiz given as a parameter
- * @param {Quizz_t} quizz - quiz we want to play 
+ * @param {Quiz_t} quiz - quiz we want to play 
  * @returns {Promise<Question_t[]>} - list of all available scenarios
  */
-export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
+export const GetQuestions = async (quiz: Quiz_t): Promise<Question_t[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getQuestions',
             "parameters": [
-                quizz.scenarios, quizz.difficulty, quizz.nbrQuestion
+                quiz.scenarios, quiz.difficultyMin, quiz.difficultyMax, quiz.nbrQuestion
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
@@ -60,33 +66,33 @@ export const GetQuestions = async (quizz: Quizz_t): Promise<Question_t[]> => {
 
 /**
  * Function to save a quiz
- * @param {Quizz_t} quizz - quiz we want to save
+ * @param {Quiz_t} quiz - quiz we want to save
  * @returns {Promise<void>} - nothing useful
  */
-export const saveQuizz = (quizz: Question_t): Promise<void> => {
+export const saveQuiz = (quiz: Question_t): Promise<void> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
-            'function': 'newQuizz',
-            "parameters": [quizz, JSON.parse(localStorage.getItem('oauth2-test-params'))["access_token"]]
+            'function': 'newQuiz',
+            "parameters": [quiz, JSON.parse(localStorage.getItem('oauth2-test-params'))["access_token"]]
         }
     }).then(ManageError);
 }
 
 /**
  * Function to get all the quiz save 
- * @returns {Promise<Quizz_t[]>} - list of all the quiz save
+ * @returns {Promise<Quiz_t[]>} - list of all the quiz save
  */
-export const getQuizz = (): Promise<Quizz_t[]> => {
+export const getQuiz = (): Promise<Quiz_t[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
-            'function': 'getQuizz',
+            'function': 'getQuiz',
             'parameters': [
                 JSON.parse(localStorage.getItem('oauth2-test-params'))["access_token"]
             ]
         }
-    }).then(ManageError).then((value: Quizz_t[]) => { return value });
+    }).then(ManageError).then((value: Quiz_t[]) => { return value });
 }
 
 /**

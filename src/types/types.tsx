@@ -35,11 +35,14 @@ export type Question_t = {
  * @var {string} situations -
  * @var {string} positions - 
 */
-export type Quizz_t = {
+export type Quiz_t = {
+    quizName: string,
     /** number of question in this quiz */
     nbrQuestion: number,
-    /** difficulty of this question */
-    difficulty: number,
+    /** difficulty min of this quiz */
+    difficultyMin: number,
+    /** difficulty max of this quiz */
+    difficultyMax: number,
     /** list of all position the user choose */
     positions: string[],
     /** list of all situation the user choose */

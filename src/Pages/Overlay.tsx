@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { QuizzContext } from '../context/QuizzContext';
+import { QuizContext } from '../context/QuizContext';
 
 /**
  * Function to create an overlay with checkbox
@@ -10,7 +10,7 @@ import { QuizzContext } from '../context/QuizzContext';
 export const Overlay = (info: { title: string, labels: string[], set }) => {
     const [show, setShow] = useState<boolean>(false);
     const [checks, setChecks] = useState<Object>({})
-    const [, setQuizz] = useContext(QuizzContext);
+    const [, setQuiz] = useContext(QuizContext);
 
     const initialLabelsRef = useRef<string[]>(info.labels);
     const initialSetRef = useRef(info.set);
@@ -31,18 +31,18 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
     }
 
     useEffect(() => {
-        setQuizz(prevQuizz => {
-            const temp = { ...prevQuizz };
+        setQuiz(prevQuiz => {
+            const temp = { ...prevQuiz };
             initialSetRef.current(checks, temp);
             return temp;
         });
-    }, [checks, setQuizz]);
+    }, [checks, setQuiz]);
 
     return (<div className="overlay py-2 align-self-start px-2 w-100">
         <div className='header d-flex '>
             <div className="d-flex" onClick={() => { setShow(!show) }}>
                 <h5>{info.title}</h5>
-                <p className='bi bi-arrow-right-circle-fill teal me-auto ms-2'></p>
+                <h5 className={`bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
             </div>
             {show && <div className='mx-auto'>
                 {/*Type button because by default it's submit */}
@@ -65,7 +65,7 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
  */
 export const ScenarioOverlay = (info: { title: string, scenarios: string[] }) => {
     const [show, setShow] = useState(false);
-    const [, setQuizz] = useContext(QuizzContext);
+    const [, setQuiz] = useContext(QuizContext);
     const [checks, setChecks] = useState({});
 
     useEffect(() => {
@@ -85,19 +85,19 @@ export const ScenarioOverlay = (info: { title: string, scenarios: string[] }) =>
         }} /> {legend} </div>
 
     useEffect(() => {
-        setQuizz(prevQuizz => {
-            const temp = { ...prevQuizz };
+        setQuiz(prevQuiz => {
+            const temp = { ...prevQuiz };
             temp.scenarios = [];
             Object.keys(checks).filter(key => checks[key]).forEach(key => temp.scenarios.push(key));
             return temp;
         });
-    }, [checks, setQuizz])
+    }, [checks, setQuiz])
 
     return (<div className="overlay py-2 align-self-start px-2 w-100">
         <div className='header d-flex '>
             <div className="d-flex" onClick={() => { setShow(!show) }}>
                 <h5>{info.title}</h5>
-                <p className='bi bi-arrow-right-circle-fill teal me-auto ms-2'></p>
+                <h5 className={`bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
             </div>
             {show && <div className='mx-auto'>
                 <button type="button" className='btn btn-primary me-2 py-1' onClick={(e) => { e.preventDefault(); let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }} >Select all</button>

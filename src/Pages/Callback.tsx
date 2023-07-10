@@ -44,6 +44,6 @@ export const Callback = () => {
         localStorage.setItem('oauth2-test-params', JSON.stringify(params));
     }
 
-    setTimeout(() => { console.log(params); navigate("/home") }, 1000);
+    setTimeout(() => { console.log(params); navigate("/home") }, 2000);
     return (<h1>Authentification ongoing</h1>);
 }

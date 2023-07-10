@@ -18,6 +18,18 @@
     color: teal;
 }
 
+.bg-suit {
+    background-color: #DEDEDE;
+}
+
+.bg-suit-n {
+    background-color: #6E6E6E;
+}
+
+.bg-pair {
+    background-color: #CCCCCC;
+}
+
 .bg-black {
     background-color: black;
 }
@@ -52,6 +64,26 @@
 
 .bg-subMenu {
     background-color: #373737 !important;
+}
+
+.bd-black {
+    border: dashed black 3px;
+}
+
+.bd-white {
+    border: solid white 3px;
+}
+
+.bd-circle {
+    border-radius: 45%;
+}
+
+.sk {
+    transform: skew(-12deg)
+}
+
+.sk-n {
+    transform: skew(12deg)
 }
 
 .row {
@@ -197,8 +229,8 @@ input[type="checkbox"] {
 
 .ExplanationOverlay {
     box-sizing: border-box;
-    height: 90vh;
-    width: 25vw;
+    height: 89vh;
+    width: 28vw;
     position: absolute;
     bottom: 0;
     right: 0;
@@ -221,4 +253,12 @@ input[type="checkbox"] {
     animation-duration: 0.5s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: forwards;
+}
+
+.rotate90 {
+    transform: rotate(90deg);
+}
+
+.xxs-font {
+    font-size: 0.80em;
 }

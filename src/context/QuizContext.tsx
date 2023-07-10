@@ -3,7 +3,7 @@ import { createContext } from 'react';
 /**
  * Context to stock the useState hook for the quizz
  */
-export const QuizzContext = createContext([]);
+export const QuizContext = createContext([]);
 
 /**
  * Context to stock the useState hook for the questions
