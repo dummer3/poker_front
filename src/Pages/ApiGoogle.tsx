@@ -130,7 +130,7 @@ export function oauthSignIn() {
     // Parameters to pass to OAuth 2.0 endpoint.
     var params = {
         'client_id': process.env.REACT_APP_CLIENT_ID,
-        'redirect_uri': 'http://127.0.0.1:3000/callback',
+        'redirect_uri': window.location.href + "callback",
         'response_type': 'token',
         'scope': SCOPES,
         'include_granted_scopes': 'true',
