@@ -1,0 +1,13 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "src/**/*.tsx"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "out": "docs",
+    "name": "Documentation",
+    "excludeNotDocumented": true,
+    "coverageLabel": "coverage"
+}
