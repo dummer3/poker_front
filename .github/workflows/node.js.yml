@@ -39,3 +39,7 @@ jobs:
         npm run build --if-present
         echo test
         npm test
+        
+    - name: Update SonarCloud Configuration
+      run: |
+        echo "sonar.exclusions=data/**" >> sonar-project.properties
