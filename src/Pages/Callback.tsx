@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { initializeApiClient, oauthSignIn } from "./ApiGoogle";
 import { useNavigate } from "react-router-dom";
-var fragmentString: string = window.location.hash.substring(1);
+let fragmentString: string = window.location.hash.substring(1);
 
 /**
  * function to launch the authentification

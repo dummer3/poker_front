@@ -45,14 +45,8 @@ export const Home = () => {
     }, []);
 
     useEffect(() => {
-        try {
-            if (quiz.situations !== null && quiz.positions != null)
-                API.getScenarios({ positions: quiz.positions, situations: quiz.situations }).then(setScenarios);
-        }
-        catch
-        {
-            console.log("gapi not load");
-        }
+        if (quiz.situations !== null && quiz.positions != null)
+            API.getScenarios({ positions: quiz.positions, situations: quiz.situations }).then(setScenarios);
     }, [quiz.situations, quiz.positions])
 
     useEffect(() => {
