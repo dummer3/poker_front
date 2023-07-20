@@ -1,6 +1,6 @@
 import { Question_t, Quiz_t } from '../types/types';
 
-declare var gapi: any
+declare let gapi: any
 
 const SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/script.external_request openid profile';
 
@@ -120,15 +120,15 @@ export const GetExplanation = async (hand: string, scenario: string): Promise<st
  */
 export function oauthSignIn() {
     // Google's OAuth 2.0 endpoint for requesting an access token
-    var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+    let oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
 
     // Create <form> element to submit parameters to OAuth 2.0 endpoint.
-    var form = document.createElement('form');
+    let form = document.createElement('form');
     form.setAttribute('method', 'GET'); // Send as a GET request.
     form.setAttribute('action', oauth2Endpoint);
 
     // Parameters to pass to OAuth 2.0 endpoint.
-    var params = {
+    let params = {
         'client_id': process.env.REACT_APP_CLIENT_ID,
         'redirect_uri': window.location.href + "callback",
         'response_type': 'token',
@@ -138,8 +138,8 @@ export function oauthSignIn() {
     };
 
     // Add form parameters as hidden input values.
-    for (var p in params) {
-        var input = document.createElement('input');
+    for (let p in params) {
+        let input = document.createElement('input');
         input.setAttribute('type', 'hidden');
         input.setAttribute('name', p);
         input.setAttribute('value', params[p]);
