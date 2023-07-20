@@ -1,5 +1,3 @@
-import React from "react";
-import $ from "react-test";
 import { BreakDownToChip } from "./Chip";
 
 describe("Chip.js test", () => {
