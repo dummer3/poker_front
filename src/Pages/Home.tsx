@@ -37,6 +37,8 @@ export const Home = () => {
     const [errors, setErrors] = useState({ positions: "", scenarios: "", situations: "", star_rating: "", questions: "", name: "" });
     const [selectedQuiz, setSelectedQuiz] = useState(-1);
     const [sortType, setSortType] = useState(0);
+    const [waitCreate, setWaitCreate] = useState(false);
+    const [waitQuiz, setWaitQuiz] = useState(false);
 
     useEffect(() => {
         API.getQuiz().then(setCreatedQuiz)
@@ -80,10 +82,10 @@ export const Home = () => {
         return !Object.keys(tempo).some(k => tempo[k])
     }
     const submit = (e) => {
-        console.log("submit");
+        setWaitCreate(true);
         e.preventDefault();
         if (verifyForm())
-            API.saveQuiz(quiz).then(() => API.getQuiz()).then((value) => { setCreatedQuiz(value); console.log(value) });
+            API.saveQuiz(quiz).then(() => API.getQuiz()).then((value) => { setCreatedQuiz(value); setWaitCreate(false); });
     }
 
     return (
@@ -161,8 +163,10 @@ export const Home = () => {
                                     {errors.name && <div className="bg-white black px-1 w-50 mx-auto mt-2">{errors.name}</div>}
                                 </label>
 
-                                <input type="submit" className="btn btn-primary my-2" value="CREATE QUIZ" />
+                                {waitCreate ? <div>Please wait</div> :
+                                    <input type="submit" className="btn btn-primary my-2" value="CREATE QUIZ" />}
                             </form >
+
                         </div>
                     } />
 
@@ -172,13 +176,16 @@ export const Home = () => {
 
 
                     <SubMenu col="col-8 ms-2 h-50" logo="bi-play-circle-fill" title="CREATED QUIZ" subTitle={<div className="d-flex align-items-center ml-auto">
-                        {selectedQuiz !== -1 &&
+                        {selectedQuiz !== -1 && (waitQuiz ? <div>Quiz loading, please wait</div> :
                             <button className="btn btn-primary me-5 py-1 px-3"
                                 onClick={() => {
+                                    setWaitQuiz(true);
                                     API.GetQuestions(createdQuiz[selectedQuiz])
-                                        .then(value => { setQuestions(value); setQuiz(createdQuiz[selectedQuiz]); navigate("/quiz"); })
+                                        .then(value => { setQuestions(value); setQuiz(createdQuiz[selectedQuiz]); setWaitQuiz(false); navigate("/quiz"); })
                                 }}
-                            > Play it</button>}
+                            > Play it</button>)}
+
+
                         <h5 className="me-3">Length:{createdQuiz.length}</h5> </div>}
 
                         content={
