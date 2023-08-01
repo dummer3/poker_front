@@ -34,9 +34,9 @@ export const ActionInfChoice: { color: string, abreviation: string, value: numbe
         { color: "green", abreviation: 'R', value: 5 },
     ]
 
-function HtoRC(hand_in) {
-    let row = Object.entries(VALUE).find(([key, _]) => { return key === hand_in[0] })[1],
-        col = Object.entries(VALUE).find(([key, _]) => { return key === hand_in[1] })[1];
+function HtoRC(hand_in: string) {
+    let row = Object.entries(VALUE).find(([key,]) => { return key === hand_in[0] })[1],
+        col = Object.entries(VALUE).find(([key,]) => { return key === hand_in[1] })[1];
 
     if (hand_in.length === 3 && hand_in[2] === 'o')
         [row, col] = [col, row];
@@ -48,8 +48,6 @@ const chartstyle = (revue, c, r) => {
 
     if (answer)
         return answer.answer === answer.solution ? '' : 'bd-white';
-
-
     return 'darker';
 }
 
@@ -214,6 +212,7 @@ const CreateBar = ({ revues }) => {
 
 export const Review = () => {
     const [informations] = useContext(ReviewContext)
+    console.log(informations);
     return <>
         <Header title="Review" />
         <div className="d-flex white mt-2">

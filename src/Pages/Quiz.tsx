@@ -175,8 +175,6 @@ const ActiontoButton = ({ action, question, setScore, nbrQuestion, setAnswered, 
  * @returns none.
  */
 export const TestAnswer = (action: any, question: Question_t, setScore, setAnswered, setReview) => {
-    console.log(question?.Correct);
-
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
     setScore((s: number) => s + question[abr]);
 
@@ -373,7 +371,6 @@ export const Quiz = () => {
 
 
     const keyDownEvent = (event) => {
-        console.log(questionRef.current);
         // Check for the specific key you want to bind the action to (e.g., Enter key with keyCode 13)
         switch (event.key) {
             case "e": if (answeredRef.current) setExplanation(exp => !exp); break;
