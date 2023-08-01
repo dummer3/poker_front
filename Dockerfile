@@ -1,4 +1,6 @@
 FROM node:16-alpine AS builder
+ENV NODE_OPTIONS=--max-old-space-size=2048
+
 
 # Set the working directory to /app inside the container
 WORKDIR /app
