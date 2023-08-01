@@ -34,7 +34,7 @@ export const Home = () => {
     const [quiz, setQuiz] = useContext(QuizContext);
     const [createdQuiz, setCreatedQuiz] = useState<Quiz_t[]>([]);
     const [scenarios, setScenarios] = useState([]);
-    const [errors, setErrors] = useState({ positions: "", scenarios: "", situations: "", star_rating: "", questions: "", name: "" });
+    const [errors, setErrors] = useState({ positions: "", scenarios: "", situation: "", star_rating: "", questions: "", name: "" });
     const [selectedQuiz, setSelectedQuiz] = useState(-1);
     const [sortType, setSortType] = useState(0);
     const [waitCreate, setWaitCreate] = useState(false);
@@ -42,12 +42,13 @@ export const Home = () => {
 
     useEffect(() => {
         API.getQuiz().then(setCreatedQuiz)
+        document.title = "Home";
     }, []);
 
     useEffect(() => {
-        if (quiz.situations !== null && quiz.positions != null)
-            API.getScenarios({ positions: quiz.positions, situations: quiz.situations }).then(setScenarios);
-    }, [quiz.situations, quiz.positions])
+        if (quiz.situation !== null && quiz.positions != null)
+            API.getScenarios({ positions: quiz.positions, situation: quiz.situation }).then(setScenarios);
+    }, [quiz.situation, quiz.positions])
 
     useEffect(() => {
         setCreatedQuiz(created => {
@@ -57,7 +58,9 @@ export const Home = () => {
                     case 1: return q1.nbrQuestion - q2.nbrQuestion;
                     case 2: return q2.nbrQuestion - q1.nbrQuestion;
                     case 3: return q1.difficultyMin - q2.difficultyMin;
-                    default: return q2.difficultyMax - q1.difficultyMax;
+                    case 4: return q2.difficultyMax - q1.difficultyMax;
+                    case 5: return q1.quizName.localeCompare(q2.quizName);
+                    default: return -q1.quizName.localeCompare(q2.quizName);
                 }
             }); return temp;
         })
@@ -66,7 +69,7 @@ export const Home = () => {
     const verifyForm = () => {
         let tempo = { ...errors };
         tempo.star_rating = quiz.difficultyMin < 0 || quiz.difficultyMax < 0 ? "Enter a difficulty range" : "";
-        tempo.situations = quiz.situations.length === 0 ? "Choose some situations" : "";
+        tempo.situation = quiz.situation.length === 0 ? "Choose one situation" : "";
         tempo.scenarios = quiz.scenarios.length === 0 ? "Choose some scenarios" : "";
         tempo.positions = quiz.positions.length === 0 ? "Choose some positions" : "";
         tempo.questions = quiz.nbrQuestion < 0 ? "Choose a number" : "";
@@ -137,10 +140,10 @@ export const Home = () => {
                                 </div>
 
 
-                                <Overlay title={"situations"} labels={["OP", "3-Bet", "4-Bet", "5-Bet"]} set={(checks, temp) => {
-                                    temp.situations = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.situations.push(key) })
+                                <Overlay title={"situations"} labels={["Opening", "3Bet", "4Bet", "5Bet"]} set={(checks, temp) => {
+                                    console.log(Object.keys(checks).find(key => checks[key] && checks[key] === true)); temp.situation = Object.keys(checks).find(key => checks[key] && checks[key] === true);
                                 }} />
-                                {errors.situations && <div className="bg-white black px-1">{errors.situations}</div>}
+                                {errors.situation && <div className="bg-white black px-1">{errors.situation}</div>}
 
                                 <Overlay title={"positions"} labels={["UTG", "HJ", "CO", "BTN", "SB", "BB"]} set={(checks, temp) => {
                                     temp.positions = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.positions.push(key) })
@@ -186,7 +189,8 @@ export const Home = () => {
                             <div className="content black bg-white m-2 ">
                                 <div className="row separator" style={{ overflowX: "hidden", overflowY: "auto", scrollbarGutter: "stable" }}>
                                     <div className="col-1"> Index </div>
-                                    <div className="col-7"> Name </div>
+                                    <div className={`bi ${sortType === 5 ? "bi-caret-up-fill" : sortType === 6 ? "bi-caret-down-fill" : ""} col-7`}
+                                        onClick={() => setSortType(sortType === 5 ? 6 : 5)}> Name </div>
                                     <div className={`bi ${sortType === 1 ? "bi-caret-up-fill" : sortType === 2 ? "bi-caret-down-fill" : ""} col-2 px-1`}
                                         onClick={() => setSortType(sortType === 1 ? 2 : 1)}> Number </div>
                                     <div className={`col-2 bi ${sortType === 3 ? "bi-caret-up-fill" : sortType === 4 ? "bi-caret-down-fill" : ""} px-1`}
@@ -195,7 +199,11 @@ export const Home = () => {
                                 <div className="mx-0" style={{ height: "50vh", overflowY: "auto", overflowX: "hidden", scrollbarGutter: "stable" }}>
                                     {createdQuiz.map((x: Quiz_t, index: number) => {
                                         return (<div key={`quiz_${index}`} className={`row separator text-center align-middle hover ${selectedQuiz === index ? "bg-black white" : ""}`}
-                                            onClick={() => setSelectedQuiz(index)} >
+                                            onClick={() => setSelectedQuiz(index)}
+                                            onDoubleClick={() => {
+                                                setSelectedQuiz(index); setWaitQuiz(true);
+                                                API.GetQuestions(createdQuiz[selectedQuiz]).then(value => { setQuestions(value); setQuiz(createdQuiz[selectedQuiz]); setWaitQuiz(false); navigate("/quiz"); })
+                                            }}>
                                             <div className="col-1 d-inline-flex flex-column align-items-center justify-content-center">{index + 1}</div>
                                             <div className="col-7 d-inline-flex flex-column align-items-center justify-content-center">  {x.quizName}</div>
                                             <div className="col-2 d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>

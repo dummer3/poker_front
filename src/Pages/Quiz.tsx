@@ -4,8 +4,8 @@ import dealer_img from '../img/dealer.webp'
 import verso_img from '../img/verso.webp'
 
 import { ValueWithChip } from './Chip'
-import { QuestionsContext } from '../context/QuizContext'
-import { Question_t } from '../types/types'
+import { QuestionsContext, QuizContext, ReviewContext } from '../context/QuizContext'
+import { Question_t, Revue_t } from '../types/types'
 import { Header } from './Header'
 import { POSITION } from './ScenarioRepresentation'
 import { ScenarioRepresentation } from './ScenarioRepresentation'
@@ -146,19 +146,20 @@ export const strToHand = (hand: string): { vl: VALUE; sl: SUIT; vr: VALUE; sr: S
     return { vl: vl, sl: sl, vr: vr, sr: sr };
 }
 
-const ActiontoButton = ({ action, question, setScore, setQuestion, score, nbrQuestion, setAnswered, answered }) => {
+const ActiontoButton = ({ action, question, setScore, nbrQuestion, setAnswered, answered, setRevue }) => {
     const [color, setColor] = useState("grey");
+
     useEffect(() => setColor(question[ActionInfChoice.find(x => x.action === action).abreviation] === undefined ? "grey" :
         answered ?
-            question?.Action === ActionInfChoice.find(x => x.action === action).abreviation ? "green" :
+            question?.Correct === ActionInfChoice.find(x => x.action === action).abreviation ? "green" :
                 "red" :
             ActionInfChoice.find(x => x.action === action).color),
         [answered, question, action, nbrQuestion]);
     return (
         <button key={action.toString()} className={`btn btn-primary btn-xs bg-${color} active col mx-3 mb-1 ${question[ActionInfChoice.find(x => x.action === action).abreviation] === undefined || answered ? "disabled" : ""}`}
             onClick={(e) => {
-                TestAnswer(action, question, setScore, setQuestion, score, nbrQuestion, setAnswered)
-            }}> {action.toString()} </button >);
+                TestAnswer(action, question, setScore, setAnswered, setRevue)
+            }}> {action.toString()}  </button >);
 }
 
 
@@ -173,14 +174,22 @@ const ActiontoButton = ({ action, question, setScore, setQuestion, score, nbrQue
  * @param {number} nbrQuestion - the actual question number.
  * @returns none.
  */
-export const TestAnswer = (action: any, question: Question_t, setScore, setQuestion, score: number, nbrQuestion: number, setAnswered) => {
+export const TestAnswer = (action: any, question: Question_t, setScore, setAnswered, setReview) => {
+    console.log(question?.Correct);
+
     const abr = ActionInfChoice.find(x => x.action === action).abreviation;
-    if (abr === question?.Action) {
-        setScore(score + question?.difficulty);
-    }
-    else {
-        setScore(score - question[abr]);
-    }
+    setScore((s: number) => s + question[abr]);
+
+    setReview(revues => {
+        let revue: Revue_t = revues.find((revue: Revue_t) => revue.scenario === question.scenario)
+        if (revue)
+            revue.answers.push({ hand: question.hand, answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct })
+        else
+            revues.push({ situation: question.situation, scenario: question.scenario, answers: [{ hand: question.hand, answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct }] })
+        return revues;
+
+    });
+
     setAnswered(true);
 }
 
@@ -256,8 +265,8 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
 
     useEffect(() => {
         setChips(Math.floor(bets.find(bet => bet.position === position).bet * 10))
-        setStock(Math.floor(Math.random() * 100))
-        let max = -Infinity, ind;
+        setStock(100 - bets.find(bet => bet.position === position).bet)
+        let max = -Infinity, ind: number;
         bets.forEach(v => {
             if (max < v.bet) {
                 max = v.bet;
@@ -316,12 +325,14 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
         </div>);
 }
 
+
 /**
  * 
  * @returns {ReactElement} - The quiz page
  */
 export const Quiz = () => {
     const [questions] = useContext(QuestionsContext);
+    const [quiz] = useContext(QuizContext);
     const [nbrQuestion, setNbrQuestion] = useState(0);
     const [score, setScore] = useState(0);
     const [heroCard, setHeroCard] = useState({ sr: SUIT.CLUB, sl: 0, vr: VALUE.Q, vl: 0 });
@@ -332,23 +343,53 @@ export const Quiz = () => {
     const [stock, setStock] = useState(0);
     const navigate = useNavigate();
     const [answered, setAnswered]: [boolean, any] = useState<boolean>(false);
+    const answeredRef = useRef(answered);
     const [explanation, setExplanation]: [boolean, any] = useState<boolean>(false);
     const [chips, setChips] = useState(0);
     const [cards, setCards] = useState([]);
     const [button, setButton] = useState([]);
 
     const [question, setQuestion] = useState<Question_t>();
+    const questionRef = useRef(question);
+
+    const [, setReview] = useContext(ReviewContext);
 
     const deck = useMemo(() => new Image(), []);
     const verso = useMemo(() => new Image(), []);
     useEffect(() => {
         deck.src = deck_img;
-        verso.src = verso_img
-    })
+        verso.src = verso_img;
+        document.title = quiz.quizName;
+        window.addEventListener('keydown', keyDownEvent);
+    },)
+
+    useEffect(() => {
+        answeredRef.current = answered;
+    }, [answered]);
+
+    useEffect(() => {
+        questionRef.current = question;
+    }, [question]);
+
+
+    const keyDownEvent = (event) => {
+        console.log(questionRef.current);
+        // Check for the specific key you want to bind the action to (e.g., Enter key with keyCode 13)
+        switch (event.key) {
+            case "e": if (answeredRef.current) setExplanation(exp => !exp); break;
+            case " ": if (answeredRef.current) { setAnswered(false); setExplanation(exp => false); setNbrQuestion(nbr => nbr + 1) }; break;
+            case "1": if (!answeredRef.current && questionRef.current.CF !== undefined) { TestAnswer(MULTIPLE_ACTION['CALL/FOLD'], questionRef.current, setScore, setAnswered, setReview) } break;
+            case "2": if (!answeredRef.current && questionRef.current.RC !== undefined) { TestAnswer(MULTIPLE_ACTION['RAISE/CALL'], questionRef.current, setScore, setAnswered, setReview) } break;
+            case "3": if (!answeredRef.current && questionRef.current.RF !== undefined) { TestAnswer(MULTIPLE_ACTION['RAISE/FOLD'], questionRef.current, setScore, setAnswered, setReview) } break;
+            case "4": if (!answeredRef.current && questionRef.current.F !== undefined) { TestAnswer(ACTION.FOLD, questionRef.current, setScore, setAnswered, setReview) } break;
+            case "5": if (!answeredRef.current && questionRef.current.C !== undefined) { TestAnswer(ACTION.CALL, questionRef.current, setScore, setAnswered, setReview) } break;
+            case "6": if (!answeredRef.current && questionRef.current.R !== undefined) { TestAnswer(ACTION.RAISE, questionRef.current, setScore, setAnswered, setReview) } break;
+        }
+    };
 
     useEffect(() => {
         if (nbrQuestion === questions.length) {
-            navigate("/home");
+            navigate("/revue");
         }
         else {
             setQuestion(questions[nbrQuestion]);
@@ -356,16 +397,15 @@ export const Quiz = () => {
     }, [nbrQuestion, questions, navigate]);
 
     useEffect(() => {
-        console.log(question);
         if (question) {
             setHeroCard(strToHand(question?.hand));
             setBets(ScenarioRepresentation(question?.scenario));
-            GetExplanation(question?.hand, question?.scenario).then(result => {
+            GetExplanation(question?.hand, question?.scenario, question?.situation).then(result => {
                 setChart(result);
             })
-            setStock(Math.floor(Math.random() * 100));
+            setStock(100 - chips / 10);
         }
-    }, [question])
+    }, [question, chips])
 
     useEffect(() => {
         setChips(Math.floor(bets.find(bet =>
@@ -374,9 +414,9 @@ export const Quiz = () => {
 
     useEffect(() => {
         if (question)
-            setButton([(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} setQuestion={setNbrQuestion} score={score} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} />),
-            (Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} setQuestion={setNbrQuestion} score={score} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} />)]);
-    }, [question, answered, nbrQuestion, score]);
+            setButton([(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} setRevue={setReview} />),
+            (Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} setRevue={setReview} />)]);
+    }, [question, answered, nbrQuestion, score, setReview]);
 
     useEffect(() => {
         setCards([<Crop deck={deck} k="hero__1" initialW={92} initialH={134} value={heroCard.vl}

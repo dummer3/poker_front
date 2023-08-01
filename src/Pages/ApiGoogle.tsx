@@ -32,16 +32,16 @@ const ManageError = (response) => {
 }
 /**
  * Function to get all available scenarios from positions and scenarios defined
- * @param {{positions:string, situations:string}} info - information needed to select a scenario
+ * @param {{positions:string[], situation:string}} info - information needed to select a scenario
  * @returns {Promise<String[]>} - list of all available scenario
  */
-export const getScenarios = (info: { positions: string[], situations: string[] }): Promise<String[]> => {
+export const getScenarios = (info: { positions: string[], situation: string }): Promise<String[]> => {
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getScenarios',
             "parameters": [
-                info.positions, info.situations
+                info.positions, info.situation
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
@@ -58,7 +58,7 @@ export const GetQuestions = async (quiz: Quiz_t): Promise<Question_t[]> => {
         'resource': {
             'function': 'getQuestions',
             "parameters": [
-                quiz.scenarios, quiz.difficultyMin, quiz.difficultyMax, quiz.nbrQuestion
+                quiz.scenarios, quiz.situation, quiz.difficultyMin, quiz.difficultyMax, quiz.nbrQuestion
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });
@@ -101,18 +101,32 @@ export const getQuiz = (): Promise<Quiz_t[]> => {
  * @param {string} scenario - scenraio for this question 
  * @returns {Promise<string[][]>} - array that represent a local part of the range chart
  */
-export const GetExplanation = async (hand: string, scenario: string): Promise<string[][]> => {
+export const GetExplanation = async (hand: string, scenario: string, situation: string): Promise<string[][]> => {
 
     return gapi.client.script.scripts.run({
         'scriptId': process.env.REACT_APP_API_ID,
         'resource': {
             'function': 'getExplanation',
             "parameters": [
-                hand, scenario
+                hand, scenario, situation
             ],
         },
     }).then(ManageError).then((chart: string[][]) => { return chart });
 }
+
+export const GetAllChart = async (scenario: string, situation: string): Promise<string[][]> => {
+
+    return gapi.client.script.scripts.run({
+        'scriptId': process.env.REACT_APP_API_ID,
+        'resource': {
+            'function': 'getAllExplanation',
+            "parameters": [
+                scenario, situation
+            ],
+        },
+    }).then(ManageError).then((chart: string[][]) => { return chart });
+}
+
 
 
 /**

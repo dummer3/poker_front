@@ -3,7 +3,7 @@
 */
 export type Question_t = {
     /** Correct action */
-    Action: string,
+    Correct: string,
     /** value for Raise */
     R: number,
     /**   value for Raise/Call */
@@ -46,7 +46,17 @@ export type Quiz_t = {
     /** list of all position the user choose */
     positions: string[],
     /** list of all situation the user choose */
-    situations: string[],
+    situation: string,
     /** list of all scenario the user choose */
     scenarios: string[]
+}
+
+/**
+ * @type - Type to represent a quiz result
+ * @var {string} scenario - 
+*/
+export type Revue_t = {
+    scenario: string,
+    situation: string,
+    answers: [{ hand: string, answer: string, solution: string }]
 }
