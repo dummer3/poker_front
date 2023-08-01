@@ -14,51 +14,48 @@ export enum POSITION {
 }
 
 export const ScenarioRepresentation = (scenario: string) => {
-    let maxValue = 1;
     const bets = [{ position: POSITION.SB, bet: 0.5 }, { position: POSITION.BB, bet: 1 }, { position: POSITION.UTG, bet: 0 },
     { position: POSITION.HJ, bet: 0 }, { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]
     const informations: string[] = scenario.split(" ");
     const situation: string = informations.pop();
-    let btr: POSITION;
+    let hero: POSITION = POSITION[informations[0]];
+    let adv: POSITION;
     const alea = Math.random();
     switch (situation) {
         case "OP":
             break;
         case "3-Bet":
             if (informations[1] === "Flatting")
-                btr = Math.round(alea) ? POSITION.UTG : POSITION.HJ;
+                adv = Math.round(alea) ? POSITION.UTG : POSITION.HJ;
             else {
                 let str: string = informations[2].includes("/") ? informations[2].split("/")[Math.round(alea)] : informations[2];
-                btr = POSITION[str];
+                adv = POSITION[str];
             }
-            bets.find(bet => bet.position === btr).bet = Math.floor(alea * 4 + 2);
+            bets.find(bet => bet.position === adv).bet = 2.5;
             break;
         case "4-Bet":
-            maxValue = Math.floor(alea * 4 + 2);
-            const newBet = maxValue * (Math.round(alea) + 1) * 4;
-            bets.find((bet) => bet.position === POSITION[informations[0]]).bet = maxValue;
+
+            bets.find((bet) => bet.position === POSITION[informations[0]]).bet = 2.5;
             if (informations[2] === "Blind") {
-                const adv = Math.round(alea);
-                bets.find(bet => {
-                    return POSITION[bet.position] === POSITION[adv]
-                }).bet = newBet;
+                adv = POSITION[POSITION[Math.round(alea)]];
             }
             else if (informations.length === 3) {
-                btr = POSITION[informations[2]];
-                bets.find(bet => bet.position === btr).bet = newBet;
+                adv = POSITION[informations[2]];
             }
             else {
                 let value: number = POSITION[informations[0]];
-                value = informations[1] === "IP" ? Math.round(alea) * (value - 1) : value + Math.round(1 + alea * (4 - value));
-                bets.find(bet => bet.position === value).bet = newBet;
+                adv = informations[1] === "IP" ? POSITION[POSITION[Math.round(alea) * (value - 1)]] : POSITION[POSITION[value + Math.round(1 + alea * (4 - value))]];
             }
+            bets.find(bet => bet.position === adv).bet = adv < hero ? 9 : 11;
             break;
         case "5-Bet":
-            maxValue = Math.floor(alea * 4 + 4);
-            bets.find(bet => bet.position === POSITION[informations[0]]).bet = maxValue;
-            let str: string = informations[informations.length - 1].includes("/") ? informations[informations.length - 1].split("/")[Math.round(alea)] : informations[informations.length - 1];
-            btr = POSITION[str];
-            bets.find(bet => bet.position === btr).bet = maxValue * (Math.round(alea) + 1) * 3;
+
+            let str: string = informations[informations.length - 1].includes("/") ?
+                informations[informations.length - 1].split("/")[Math.round(alea)] :
+                informations[informations.length - 1];
+            adv = POSITION[str];
+            bets.find(bet => bet.position === adv).bet = adv < hero ? 23 : 25;
+            bets.find(bet => bet.position === hero).bet = adv < hero ? 11 : 9;
             break;
     }
     return bets;

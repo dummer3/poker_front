@@ -1,1 +1,16 @@
-{"parent":"98925f95-b593-4463-9141-fb1d023313c5","pid":4832,"argv":["C:\\Program Files\\nodejs\\node.exe","C:\\Users\\33648\\Desktop\\Texas_holder\\poker_front\\node_modules\\jest-worker\\build\\workers\\processChild.js"],"execArgv":[],"cwd":"C:\\Users\\33648\\Desktop\\Texas_holder\\poker_front","time":1689869523749,"ppid":3316,"coverageFilename":"C:\\Users\\33648\\Desktop\\Texas_holder\\poker_front\\.nyc_output\\5798117d-366c-4068-b637-8ccf98509491.json","externalId":"","uuid":"5798117d-366c-4068-b637-8ccf98509491","files":[]}
+{
+    "parent": "98925f95-b593-4463-9141-fb1d023313c5",
+    "pid": 4832,
+    "argv": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\33648\\Desktop\\Texas_holder\\poker_front\\node_modules\\jest-worker\\build\\workers\\processChild.js"
+    ],
+    "execArgv": [],
+    "cwd": "C:\\Users\\33648\\Desktop\\Texas_holder\\poker_front",
+    "time": 1689869523749,
+    "ppid": 3316,
+    "coverageFilename": "C:\\Users\\33648\\Desktop\\Texas_holder\\poker_front\\.nyc_output\\5798117d-366c-4068-b637-8ccf98509491.json",
+    "externalId": "",
+    "uuid": "5798117d-366c-4068-b637-8ccf98509491",
+    "files": []
+}

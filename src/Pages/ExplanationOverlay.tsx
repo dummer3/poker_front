@@ -93,13 +93,13 @@ export const ExplanationOverlay = (info: { question: Question_t, setExplanation:
                     {ActionInfChoice.filter(infoAct => info.question[infoAct.abreviation] !== undefined).map(infoAct => {
                         return <div className="row mb-2" key={`row-${infoAct.abreviation}`}>
                             <div className={`col-3 bg-${infoAct.color}`}>{infoAct.abreviation}</div>
-                            <div className="col-9">{infoAct.action}: {infoAct.abreviation === info.question.Action ? info.question.difficulty : `-${info.question[infoAct.abreviation]}`} points</div>
+                            <div className="col-9">{infoAct.action}: {infoAct.abreviation === info.question.Correct ? info.question.difficulty : `-${info.question[infoAct.abreviation]}`} points</div>
                         </div>
                     })}
                 </div>
                 <div className="col-6">
                     <div className="row mb-2">
-                        <div className="col-3 bd-black"></div>
+                        <div className="col-3 bd-black bd-dashed"></div>
                         <div className="col-9"> Actual Hand ({info.question.hand})</div>
                     </div>
                     <div className="row mb-2">

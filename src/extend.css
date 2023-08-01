@@ -67,7 +67,11 @@
 }
 
 .bd-black {
-    border: dashed black 3px;
+    border: solid black 3px;
+}
+
+.bd-dashed {
+    border-style: dashed;
 }
 
 .bd-white {
@@ -94,6 +98,10 @@
 .col-8 {
     margin-left: 2%;
     width: 64%;
+}
+
+.col-13 {
+    width: 7%;
 }
 
 .col-2 {
@@ -261,4 +269,13 @@ input[type="checkbox"] {
 
 .xxs-font {
     font-size: 0.80em;
+}
+
+.bar {
+    align-content: center;
+    display: grid;
+}
+
+.darker {
+    filter: brightness(33%);
 }
