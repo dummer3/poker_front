@@ -44,7 +44,7 @@ function HtoRC(hand_in: string) {
 }
 
 const chartstyle = (revue, c, r) => {
-    let answer = revue.answers.find(answer => JSON.stringify(HtoRC(answer.hand)) === JSON.stringify({ col: c, row: r }));
+    let answer = revue.answers.find(answer => JSON.stringify(HtoRC(answer.hand.toString())) === JSON.stringify({ col: c, row: r }));
 
     if (answer)
         return answer.answer === answer.solution ? '' : 'bd-white';
