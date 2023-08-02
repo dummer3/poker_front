@@ -108,7 +108,7 @@ export const GetExplanation = async (hand: string, scenario: string, situation: 
         'resource': {
             'function': 'getExplanation',
             "parameters": [
-                hand, scenario, situation
+                hand.toString(), scenario, situation
             ],
         },
     }).then(ManageError).then((chart: string[][]) => { return chart });
