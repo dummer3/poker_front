@@ -1,7 +1,7 @@
 import { Header } from "./Header";
 import * as API from "./ApiGoogle";
 import { useContext, useEffect, useState } from "react";
-import { QuestionsContext, QuizContext } from "../context/QuizContext";
+import { QuestionsContext, QuizContext, ReviewContext } from "../context/QuizContext";
 import { useNavigate } from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import ReactStars from "react-rating-stars-component";
@@ -32,6 +32,7 @@ export const Home = () => {
     const navigate = useNavigate();
     const [, setQuestions] = useContext(QuestionsContext);
     const [quiz, setQuiz] = useContext(QuizContext);
+    const [, setReview] = useContext(ReviewContext);
     const [createdQuiz, setCreatedQuiz] = useState<Quiz_t[]>([]);
     const [scenarios, setScenarios] = useState([]);
     const [errors, setErrors] = useState({ positions: "", scenarios: "", situation: "", star_rating: "", questions: "", name: "" });
@@ -60,7 +61,13 @@ export const Home = () => {
                     case 3: return q1.difficultyMin - q2.difficultyMin;
                     case 4: return q2.difficultyMax - q1.difficultyMax;
                     case 5: return q1.quizName.localeCompare(q2.quizName);
-                    default: return -q1.quizName.localeCompare(q2.quizName);
+                    case 6: return q2.quizName.localeCompare(q1.quizName);
+                    case 7: return q1.positions.toString().localeCompare(q2.positions.toString());
+                    case 8: return q2.positions.toString().localeCompare(q1.positions.toString());
+                    case 9: return q1.scenarios.toString().localeCompare(q2.scenarios.toString());
+                    case 10: return q2.scenarios.toString().localeCompare(q1.scenarios.toString());
+                    case 11: return q1.situation.localeCompare(q2.situation);
+                    default: return q2.situation.localeCompare(q1.situation);
                 }
             }); return temp;
         })
@@ -70,7 +77,7 @@ export const Home = () => {
         let tempo = { ...errors };
         tempo.star_rating = quiz.difficultyMin < 0 || quiz.difficultyMax < 0 ? "Enter a difficulty range" : "";
         tempo.situation = quiz.situation.length === 0 ? "Choose one situation" : "";
-        tempo.scenarios = quiz.scenarios.length === 0 ? "Choose some scenarios" : "";
+        tempo.scenarios = quiz.scenarios.length === 0 && quiz.situation !== "Opening" ? "Choose some scenarios" : "";
         tempo.positions = quiz.positions.length === 0 ? "Choose some positions" : "";
         tempo.questions = quiz.nbrQuestion < 0 ? "Choose a number" : "";
         tempo.name = quiz.quizName === "" ? "Enter a name for this quiz" : "";
@@ -79,10 +86,11 @@ export const Home = () => {
         return !Object.keys(tempo).some(k => tempo[k])
     }
     const submit = (e) => {
-        setWaitCreate(true);
         e.preventDefault();
-        if (verifyForm())
+        if (verifyForm()) {
+            setWaitCreate(true);
             API.saveQuiz(quiz).then(() => API.getQuiz()).then((value) => { setCreatedQuiz(value); setWaitCreate(false); });
+        }
     }
 
     return (
@@ -140,17 +148,17 @@ export const Home = () => {
                                 </div>
 
 
-                                <Overlay title={"situations"} labels={["Opening", "3Bet", "4Bet", "5Bet"]} set={(checks, temp) => {
+                                <Overlay title={"Situations"} labels={["Opening", "3Bet", "4Bet", "5Bet"]} set={(checks, temp) => {
                                     console.log(Object.keys(checks).find(key => checks[key] && checks[key] === true)); temp.situation = Object.keys(checks).find(key => checks[key] && checks[key] === true);
                                 }} />
                                 {errors.situation && <div className="bg-white black px-1">{errors.situation}</div>}
 
-                                <Overlay title={"positions"} labels={["UTG", "HJ", "CO", "BTN", "SB", "BB"]} set={(checks, temp) => {
+                                <Overlay title={"Hero position"} labels={["UTG", "HJ", "CO", "BTN", "SB", "BB"]} set={(checks, temp) => {
                                     temp.positions = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.positions.push(key) })
                                 }} />
                                 {errors.positions && <div className="bg-white black px-1">{errors.positions}</div>}
 
-                                <ScenarioOverlay title={"scenarios"} scenarios={scenarios} />
+                                {quiz.situation !== "Opening" && <ScenarioOverlay title={"Vilains Positions"} scenarios={scenarios} />}
                                 {errors.scenarios && <div className="bg-white black px-1">{errors.scenarios}</div>}
 
                                 <label htmlFor="quiz_name" className="w-100">
@@ -167,15 +175,11 @@ export const Home = () => {
                         </div>
                     } />
 
-
-
-
-
-
                     <SubMenu col="col-8 ms-2 h-50" logo="bi-play-circle-fill" title="CREATED QUIZ" subTitle={<div className="d-flex align-items-center ml-auto">
                         {selectedQuiz !== -1 && (waitQuiz ? <div>Quiz loading, please wait</div> :
                             <button className="btn btn-primary me-5 py-1 px-3"
                                 onClick={() => {
+                                    setReview([]);
                                     setWaitQuiz(true);
                                     API.GetQuestions(createdQuiz[selectedQuiz])
                                         .then(value => { setQuestions(value); setQuiz(createdQuiz[selectedQuiz]); setWaitQuiz(false); navigate("/quiz"); })
@@ -189,11 +193,17 @@ export const Home = () => {
                             <div className="content black bg-white m-2 ">
                                 <div className="row separator" style={{ overflowX: "hidden", overflowY: "auto", scrollbarGutter: "stable" }}>
                                     <div className="col-1"> Index </div>
-                                    <div className={`bi ${sortType === 5 ? "bi-caret-up-fill" : sortType === 6 ? "bi-caret-down-fill" : ""} col-7`}
+                                    <div className={`col-3 bi ${sortType === 5 ? "bi-caret-up-fill" : sortType === 6 ? "bi-caret-down-fill" : ""}`}
                                         onClick={() => setSortType(sortType === 5 ? 6 : 5)}> Name </div>
-                                    <div className={`bi ${sortType === 1 ? "bi-caret-up-fill" : sortType === 2 ? "bi-caret-down-fill" : ""} col-2 px-1`}
+                                    <div className={`col-2 bi ${sortType === 11 ? "bi-caret-up-fill" : sortType === 12 ? "bi-caret-down-fill" : ""} px-1`}
+                                        onClick={() => setSortType(sortType === 11 ? 12 : 11)}> Situation </div>
+                                    <div className={`col-2 bi ${sortType === 7 ? "bi-caret-up-fill" : sortType === 8 ? "bi-caret-down-fill" : ""} px-1`}
+                                        onClick={() => setSortType(sortType === 7 ? 8 : 7)}> Hero </div>
+                                    <div className={`col-2 bi ${sortType === 9 ? "bi-caret-up-fill" : sortType === 10 ? "bi-caret-down-fill" : ""} px-1`}
+                                        onClick={() => setSortType(sortType === 9 ? 10 : 9)}> Adversity </div>
+                                    <div className={`col-1  bi ${sortType === 1 ? "bi-caret-up-fill" : sortType === 2 ? "bi-caret-down-fill" : ""} px-1`}
                                         onClick={() => setSortType(sortType === 1 ? 2 : 1)}> Number </div>
-                                    <div className={`col-2 bi ${sortType === 3 ? "bi-caret-up-fill" : sortType === 4 ? "bi-caret-down-fill" : ""} px-1`}
+                                    <div className={`col-1 bi ${sortType === 3 ? "bi-caret-up-fill" : sortType === 4 ? "bi-caret-down-fill" : ""} px-1`}
                                         onClick={() => setSortType(sortType === 3 ? 4 : 3)}> Difficulty </div>
                                 </div>
                                 <div className="mx-0" style={{ height: "50vh", overflowY: "auto", overflowX: "hidden", scrollbarGutter: "stable" }}>
@@ -201,13 +211,16 @@ export const Home = () => {
                                         return (<div key={`quiz_${index}`} className={`row separator text-center align-middle hover ${selectedQuiz === index ? "bg-black white" : ""}`}
                                             onClick={() => setSelectedQuiz(index)}
                                             onDoubleClick={() => {
-                                                setSelectedQuiz(index); setWaitQuiz(true);
+                                                setReview([]); setSelectedQuiz(index); setWaitQuiz(true);
                                                 API.GetQuestions(createdQuiz[selectedQuiz]).then(value => { setQuestions(value); setQuiz(createdQuiz[selectedQuiz]); setWaitQuiz(false); navigate("/quiz"); })
                                             }}>
                                             <div className="col-1 d-inline-flex flex-column align-items-center justify-content-center">{index + 1}</div>
-                                            <div className="col-7 d-inline-flex flex-column align-items-center justify-content-center">  {x.quizName}</div>
-                                            <div className="col-2 d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>
-                                            <div className="col-2 d-inline-flex align-items-center justify-content-center">  [{x.difficultyMin}-{x.difficultyMax}] </div>                                   </div>)
+                                            <div className="col-3 d-inline-flex flex-column align-items-center justify-content-center">  {x.quizName}</div>
+                                            <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.situation}</div>
+                                            <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.positions.map((el) => <div key={el}>{el}</div>)}</div>
+                                            <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.scenarios.map((el) => <div key={el}>{el}</div>)}</div>
+                                            <div className="col-1 d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>
+                                            <div className="col-1 d-inline-flex align-items-center justify-content-center">  [{x.difficultyMin}-{x.difficultyMax}] </div>                                   </div>)
                                     })}
                                 </div>
                             </div>}

@@ -13,18 +13,17 @@ export enum POSITION {
     BTN = 5
 }
 
-export const ScenarioRepresentation = (scenario: string) => {
+export const ScenarioRepresentation = (scenario: string, situation: string) => {
     const bets = [{ position: POSITION.SB, bet: 0.5 }, { position: POSITION.BB, bet: 1 }, { position: POSITION.UTG, bet: 0 },
     { position: POSITION.HJ, bet: 0 }, { position: POSITION.CO, bet: 0 }, { position: POSITION.BTN, bet: 0 }]
     const informations: string[] = scenario.split(" ");
-    const situation: string = informations.pop();
     let hero: POSITION = POSITION[informations[0]];
     let adv: POSITION;
     const alea = Math.random();
     switch (situation) {
-        case "OP":
+        case "Opening":
             break;
-        case "3-Bet":
+        case "3Bet":
             if (informations[1] === "Flatting")
                 adv = Math.round(alea) ? POSITION.UTG : POSITION.HJ;
             else {
@@ -33,7 +32,7 @@ export const ScenarioRepresentation = (scenario: string) => {
             }
             bets.find(bet => bet.position === adv).bet = 2.5;
             break;
-        case "4-Bet":
+        case "4Bet":
 
             bets.find((bet) => bet.position === POSITION[informations[0]]).bet = 2.5;
             if (informations[2] === "Blind") {
@@ -48,7 +47,7 @@ export const ScenarioRepresentation = (scenario: string) => {
             }
             bets.find(bet => bet.position === adv).bet = adv < hero ? 9 : 11;
             break;
-        case "5-Bet":
+        case "5Bet":
 
             let str: string = informations[informations.length - 1].includes("/") ?
                 informations[informations.length - 1].split("/")[Math.round(alea)] :
