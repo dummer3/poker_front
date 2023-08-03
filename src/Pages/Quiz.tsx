@@ -181,9 +181,9 @@ export const TestAnswer = (action: any, question: Question_t, setScore, setAnswe
     setReview(revues => {
         let revue: Revue_t = revues.find((revue: Revue_t) => revue.scenario === question.scenario)
         if (revue)
-            revue.answers.push({ hand: question.hand, answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct })
+            revue.answers.push({ hand: question.hand.toString(), answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct })
         else
-            revues.push({ situation: question.situation, scenario: question.scenario, answers: [{ hand: question.hand, answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct }] })
+            revues.push({ situation: question.situation, scenario: question.scenario, answers: [{ hand: question.hand.toString(), answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct }] })
         return revues;
 
     });
@@ -350,7 +350,7 @@ export const Quiz = () => {
     const [question, setQuestion] = useState<Question_t>();
     const questionRef = useRef(question);
 
-    const [, setReview] = useContext(ReviewContext);
+    const [review, setReview] = useContext(ReviewContext);
 
     const deck = useMemo(() => new Image(), []);
     const verso = useMemo(() => new Image(), []);
@@ -359,7 +359,9 @@ export const Quiz = () => {
         verso.src = verso_img;
         document.title = quiz.quizName;
         window.addEventListener('keydown', keyDownEvent);
-    },)
+        questions.forEach(question => { if (question.situation === "Opening") question.scenarios = question.positions; })
+        console.log(review);
+    }, [])
 
     useEffect(() => {
         answeredRef.current = answered;
@@ -396,7 +398,7 @@ export const Quiz = () => {
     useEffect(() => {
         if (question) {
             setHeroCard(strToHand(question?.hand));
-            setBets(ScenarioRepresentation(question?.scenario));
+            setBets(ScenarioRepresentation(question?.scenario, question?.situation));
             GetExplanation(question?.hand, question?.scenario, question?.situation).then(result => {
                 setChart(result);
             })
@@ -427,7 +429,7 @@ export const Quiz = () => {
 
     return (
         <div className="quiz d-flex flex-column">
-            <Header title={question?.scenario.substring(0, question?.scenario.lastIndexOf(" "))}
+            <Header title={question?.scenario.substring(question?.scenario.indexOf(" "), question?.scenario.length)}
                 leftText={question?.situation === "OP" ? "Opening" : question?.situation}
                 leftSub={question?.position}
                 rightText={`Score: ${score}`}

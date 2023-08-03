@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { GetAllChart } from "./ApiGoogle";
 import { Revue_t } from "../types/types";
 import { ReviewContext } from "../context/QuizContext";
-import { ScatterChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Scatter } from 'recharts';
+import { ScatterChart, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, Legend, Scatter, ResponsiveContainer } from 'recharts';
 import { Header } from "./Header";
 
 const VALUE = {
@@ -56,10 +56,7 @@ const CreateRangeChart = ({ revue }) => {
     const [chart, setChart] = useState([]);
     useEffect(() => { GetAllChart(revue.scenario, revue.situation).then(response => setChart(response)) }, [revue]);
 
-    const chartWidth = 400;
-    const chartHeight = 400;
-
-    const midX = "58%";
+    const midX = "55%";
     const midY = "42%";
     const topLabelY = "6%";
     const bottomLabelY = "80%";
@@ -91,7 +88,6 @@ const CreateRangeChart = ({ revue }) => {
         solX = (solutionCalled + solutionRaised) / solutionTotalHand,
         solY = (solutionCalled + solutionRaised) === 0 ? 0.5 : solutionRaised / (solutionCalled + solutionRaised);
 
-    console.log(`X ${userX} Y ${userY} X ${solX} Y ${solY}`);
 
     userX = Math.round((userX * 2 - 1) * 100) / 100
     userY = Math.round((userY * 2 - 1) * 100) / 100;
@@ -117,58 +113,72 @@ const CreateRangeChart = ({ revue }) => {
                 })}
             </div>
             <div className="w-50">
-                <ScatterChart width={chartWidth} height={chartHeight}
-                    data={[
-                        { x: 1, y: 10 },
-                        { x: 2, y: 15 }]}>
+                <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart margin={{ top: 15, right: 15, bottom: 15, left: 15 }}>
+                        <CartesianGrid strokeDasharray="10 10" />
+                        <XAxis dataKey="x" type="number" name="Loose/Tight" domain={[-1, 1]} stroke={"#FFF"} />
+                        <YAxis dataKey="y" type="number" name="Passive/Agressive" domain={[-1, 1]} stroke={"#FFF"} />
+                        <ZAxis range={[300, 301]} />
 
-                    <CartesianGrid strokeDasharray="10 10" />
-                    <XAxis dataKey="x" type="number" name="Loose/Tight" domain={[-1, 1]} stroke={"#FFF"} />
-                    <YAxis dataKey="y" type="number" name="Passive/Agressive" domain={[-1, 1]} stroke={"#FFF"} />
-
-                    <text
-                        x={midX}
-                        y={topLabelY}
-                        style={{ fontSize: 20, fill: '#6F6' }}
-                        textAnchor='middle'
-                        alignment-baseline='middle'
-                    >
-                        Agressive
-                    </text>
-                    <text
-                        x={midX}
-                        y={bottomLabelY}
-                        style={{ fontSize: 20, fill: '#F66' }}
-                        textAnchor='middle'
-                        alignment-baseline='middle'
-                    >
-                        Passive
-                    </text>
-                    <text
-                        x={rightLabelX}
-                        y={midY}
-                        style={{ fontSize: 20, fill: '#6F6' }}
-                        textAnchor='middle'
-                        alignment-baseline='middle'
-                    >
-                        Tight
-                    </text>
-                    <text
-                        x={leftLabelX}
-                        y={midY}
-                        style={{ fontSize: 20, fill: '#F66' }}
-                        textAnchor='middle'
-                        alignment-baseline='middle'
-                    >
-                        Loose
-                    </text>
+                        <text
+                            x={midX}
+                            y={topLabelY}
+                            style={{ fontSize: 20, fill: '#6F6' }}
+                            textAnchor='middle'
+                            alignmentBaseline='middle'
+                        >
+                            Agressive
+                        </text>
+                        <text
+                            x={midX}
+                            y={bottomLabelY}
+                            style={{ fontSize: 20, fill: '#F66' }}
+                            textAnchor='middle'
+                            alignmentBaseline='middle'
+                        >
+                            Passive
+                        </text>
+                        <text
+                            x={rightLabelX}
+                            y={midY}
+                            style={{ fontSize: 20, fill: '#6F6' }}
+                            textAnchor='middle'
+                            alignmentBaseline='middle'
+                        >
+                            Tight
+                        </text>
+                        <text
+                            x={leftLabelX}
+                            y={midY}
+                            style={{ fontSize: 20, fill: '#F66' }}
+                            textAnchor='middle'
+                            alignmentBaseline='middle'
+                        >
+                            Loose
+                        </text>
 
 
-                    <Tooltip cursor={{ strokeDasharray: '10 10' }} />
-                    <Legend />
-                    <Scatter name="Solution" data={[{ x: solX, y: solY }]} fill="#8884d8" />
-                    <Scatter name="Yours" data={[{ x: userX, y: userY }]} fill="#82ca9d" />
-                </ScatterChart>
+                        <Tooltip cursor={{ strokeDasharray: '10 10' }} />
+                        <Legend payload={
+                            [{
+                                id: "Solution",
+                                type: "star",
+                                color: "#8884d8",
+                                value: "Solution"
+                            },
+                            {
+                                id: "your",
+                                type: "circle",
+                                color: "#82ca9d",
+                                value: "Yours"
+                            }
+                            ]
+                        }
+                        />
+                        <Scatter name="Solution" data={[{ x: solX, y: solY }]} fill="#8884d8" shape="star" />
+                        <Scatter name="Yours" data={[{ x: userX, y: userY }]} fill="#82ca9d" />
+                    </ScatterChart>
+                </ResponsiveContainer>
             </div>
         </div>
     </div>
@@ -192,22 +202,27 @@ const CreateBar = ({ revues }) => {
 
     })
 
-    return (<>
-        <div className="row mx-2 gx-2 h-75" >
+    return (<div className="h-100 mx-4">
+        <div className="row gx-5 h-50" >
             <div className="col-6 my-2">
-                {Object.entries(userAnswer).map(([category, number]) => { return number > 0 && <div className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 100 / userTotal}%` }}>{category} ({Math.round(number * 100 / userTotal)}%)</div> })}
+                Your stats
+                {Object.entries(userAnswer).map(([category, number]) => { return number > 0 && <div key={`user-${category}`} className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 100 / userTotal}%` }}>{category} ({Math.round(number * 100 / userTotal)}%)</div> })}
             </div>
             <div className="col-6 my-2">
-                {Object.entries(correctAnswer).map(([category, number]) => { return number > 0 && <div className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 100 / totalCorrect}%` }}>{category} ({Math.round(number * 100 / totalCorrect)}%)</div> })}
+                Solutions
+                {Object.entries(correctAnswer).map(([category, number]) => { return number > 0 && <div key={`solution-${category}`} className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 100 / totalCorrect}%` }}>{category} ({Math.round(number * 100 / totalCorrect)}%)</div> })}
             </div>
 
         </div>
-        <div className="h-25">
+        <div className="h-25 my-4">
             <h4>Hand Played: {Math.round((userAnswer.R + userAnswer.C) / userTotal * 100)}%</h4>
             <h4>Hand raised: {Math.round(userAnswer.R / userTotal * 100)}%</h4>
             <h4>Correct Answer: {Math.round(rightAnswer / total * 100)}%</h4>
+            <h4>Tightness: {Math.round((userAnswer.R + userAnswer.C) / (correctAnswer.R + correctAnswer.C) / total * 100)}%</h4>
+            <h4>Passiveness: {Math.round(userAnswer.R / correctAnswer.R * 100)}%</h4>
+            <h4></h4>
         </div>
-    </>)
+    </div>)
 }
 
 export const Review = () => {
@@ -219,7 +234,7 @@ export const Review = () => {
             <div className="col-9 mx-2 bg-subMenu px-2">
                 {informations.map(revue => <CreateRangeChart revue={revue} />)}
             </div>
-            <div className="col-3 bg-subMenu">
+            <div className="col-3 bg-subMenu" style={{ minHeight: "20vh" }}>
                 <CreateBar revues={informations} />
             </div>
         </div>

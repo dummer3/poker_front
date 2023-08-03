@@ -58,7 +58,7 @@ export const GetQuestions = async (quiz: Quiz_t): Promise<Question_t[]> => {
         'resource': {
             'function': 'getQuestions',
             "parameters": [
-                quiz.scenarios, quiz.situation, quiz.difficultyMin, quiz.difficultyMax, quiz.nbrQuestion
+                quiz.situation !== "Opening" ? quiz.scenarios : quiz.positions, quiz.situation, quiz.difficultyMin, quiz.difficultyMax, quiz.nbrQuestion
             ],
         },
     }).then(ManageError).then((questions: Question_t[]) => { return questions });

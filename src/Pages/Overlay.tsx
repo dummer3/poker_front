@@ -49,8 +49,9 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
                 <p className={`h5 bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
             </div>
             {show && <div className='mx-auto'>
-                <button type="button" className='btn btn-primary me-2 py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }}  >Select all</button>
-                <button type="button" className='btn btn-primary py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button></div>}
+                {false && <button type="button" className='btn btn-primary me-2 py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }}  >Select all</button>}
+                {false && <button type="button" className='btn btn-primary py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button>}
+            </div>}
 
         </div>
         {show && <div className='content d-flex flex-wrap w-100 flex-overlay justify-content-center'>
