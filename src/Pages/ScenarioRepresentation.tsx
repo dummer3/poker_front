@@ -1,17 +1,4 @@
-/**
- * Position enum for the player position.
- * @readonly
- * @private
- * @enum {number}
- */
-export enum POSITION {
-    SB = 0,
-    BB = 1,
-    UTG = 2,
-    HJ = 3,
-    CO = 4,
-    BTN = 5
-}
+import { POSITION } from "./Enum";
 
 export const ScenarioRepresentation = (scenario: string, situation: string) => {
     const bets = [{ position: POSITION.SB, bet: 0.5 }, { position: POSITION.BB, bet: 1 }, { position: POSITION.UTG, bet: 0 },

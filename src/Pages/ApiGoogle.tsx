@@ -127,6 +127,18 @@ export const GetAllChart = async (scenario: string, situation: string): Promise<
     }).then(ManageError).then((chart: string[][]) => { return chart });
 }
 
+export const getQuizQuestionNumber = async (situation: string, scenarios: string[], difficultyMin: number, difficultyMax: number): Promise<number> => {
+
+    return gapi.client.script.scripts.run({
+        'scriptId': process.env.REACT_APP_API_ID,
+        'resource': {
+            'function': 'getQuizQuestionNumber',
+            "parameters": [
+                situation, scenarios, difficultyMin, difficultyMax
+            ],
+        },
+    }).then(ManageError).then((chart: string[][]) => { return chart });
+}
 
 
 /**

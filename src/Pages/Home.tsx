@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import ReactStars from "react-rating-stars-component";
 import { Quiz_t } from "../types/types";
-import { Overlay, ScenarioOverlay } from "./Overlay";
+import { SituationOverlay, PositionOverlay, ScenarioOverlay } from "./Overlay";
 
 const SubMenu = ({ col, title, content, logo, subTitle }) => <div className={`SubMenu bg-subMenu ${col} px-0 d-flex flex-column`}>
     <div className="header d-flex align-items-start">
@@ -40,16 +40,27 @@ export const Home = () => {
     const [sortType, setSortType] = useState(0);
     const [waitCreate, setWaitCreate] = useState(false);
     const [waitQuiz, setWaitQuiz] = useState(false);
+    const [maxQuestion, setMaxQuestion] = useState(21);
+    const [availableHeroPositions, setAvailableHeroPositions] = useState(["UTG", "HJ", "CO", "BTN", "SB", "BB"]);
+
 
     useEffect(() => {
         API.getQuiz().then(setCreatedQuiz)
         document.title = "Home";
     }, []);
 
+    useEffect(() => { console.log(quiz.situation); setAvailableHeroPositions(quiz.situation === "Opening" || quiz.situation === "4Bet" ? ["UTG", "HJ", "CO", "BTN", "SB"] : ["HJ", "CO", "BTN", "SB", "BB"]) }
+        , [quiz.situation])
+
     useEffect(() => {
         if (quiz.situation !== null && quiz.positions != null)
             API.getScenarios({ positions: quiz.positions, situation: quiz.situation }).then(setScenarios);
     }, [quiz.situation, quiz.positions])
+
+    useEffect(() => {
+        if (quiz.situation !== "" && (quiz.scenarios.length !== 0 || quiz.situation === "Opening") && quiz.positions.length !== 0 && quiz.difficultyMin !== -1 && quiz.difficultyMax !== -1)
+            API.getQuizQuestionNumber(quiz.situation, quiz.situation !== "Opening" ? quiz.scenarios : quiz.positions, quiz.difficultyMin, quiz.difficultyMax).then(value => { console.log(value); setMaxQuestion(value); });
+    }, [quiz.situation, quiz.scenarios, quiz.positions, quiz.difficultyMin, quiz.difficultyMax])
 
     useEffect(() => {
         setCreatedQuiz(created => {
@@ -102,10 +113,32 @@ export const Home = () => {
                         <div className="content">
                             <form className="d-inline-flex flex-column flex-wrap align-items-center w-100" onSubmit={submit}>
 
+                                <label htmlFor="quiz_name" className="w-100 mb-4">
+                                    <div>Quiz name :</div>
+                                    <input className="w-75" type="text" value={quiz.quizName} maxLength={200} placeholder={"Enter quiz name"}
+                                        onChange={(e) => { let temp = { ...quiz }; temp.quizName = e.target.value; setQuiz(temp); }} />
+                                    {errors.name && <div className="bg-white black px-1 w-50 mx-auto mt-2">{errors.name}</div>}
+                                </label>
+
+                                <SituationOverlay title={"Situations"} labels={["Opening", "3Bet", "4Bet", "5Bet"]} set={(checks, temp) => {
+                                    console.log(Object.keys(checks).find(key => checks[key] && checks[key] === true)); temp.situation = Object.keys(checks).find(key => checks[key] && checks[key] === true);
+                                }} />
+                                {errors.situation && <div className="bg-white black px-1">{errors.situation}</div>}
+
+                                <PositionOverlay title={"Hero position"} labels={availableHeroPositions} set={(checks, temp) => {
+                                    temp.positions = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.positions.push(key) })
+                                }} />
+                                {errors.positions && <div className="bg-white black px-1">{errors.positions}</div>}
+
+                                {quiz.situation !== "Opening" && <ScenarioOverlay title={"Vilains Positions"} scenarios={scenarios} />}
+                                {errors.scenarios && <div className="bg-white black px-1">{errors.scenarios}</div>}
+
+
                                 <div className="row mx-2">
-                                    <label htmlFor="difficulty_min" className="w-50 text-start">
+                                    <label htmlFor="difficulty_min" className="w-50 m-auto">
                                         Difficulty Min :
                                         <ReactStars
+                                            classNames="stars"
                                             name="stars_min"
                                             key={`stars_${quiz.difficultyMin}`}
                                             value={quiz.difficultyMin / 2}
@@ -119,10 +152,11 @@ export const Home = () => {
                                             isHalf={true}
                                         />
                                     </label>
-                                    <label htmlFor="difficulty_max" className="w-50 text-start">
+                                    <label htmlFor="difficulty_max" className="w-50 m-auto justify-content-center">
                                         Difficulty Max :
 
                                         <ReactStars
+                                            classNames="stars"
                                             key={`stars_${quiz.difficultyMax}`}
                                             name="stars_max"
                                             value={quiz.difficultyMax / 2}
@@ -139,34 +173,15 @@ export const Home = () => {
                                     {errors.star_rating && <div className="bg-white black px-1 w-50 m-2">{errors.star_rating}</div>}
 
 
-                                    <label htmlFor="nbr_question" className="w-50">
+                                    <label htmlFor="nbr_question" className="w-50 my-2">
                                         <div>Number of question :</div>
-                                        <input className="w-75" type="number" min={1} max={20} placeholder={"how many questions ?"}
+                                        <input className="w-75" type="number" min={1} max={Math.min(20, maxQuestion)} placeholder={"how many questions ?"}
                                             onChange={(e) => { let temp = { ...quiz }; temp.nbrQuestion = e.target.value; setQuiz(temp); }} />
                                         {errors.questions && <div className="bg-white black px-1 mt-2">{errors.questions}</div>}
                                     </label>
+
+                                    {maxQuestion !== 21 && <div className="w-50 m-auto">Available questions: {maxQuestion}</div>}
                                 </div>
-
-
-                                <Overlay title={"Situations"} labels={["Opening", "3Bet", "4Bet", "5Bet"]} set={(checks, temp) => {
-                                    console.log(Object.keys(checks).find(key => checks[key] && checks[key] === true)); temp.situation = Object.keys(checks).find(key => checks[key] && checks[key] === true);
-                                }} />
-                                {errors.situation && <div className="bg-white black px-1">{errors.situation}</div>}
-
-                                <Overlay title={"Hero position"} labels={["UTG", "HJ", "CO", "BTN", "SB", "BB"]} set={(checks, temp) => {
-                                    temp.positions = []; Object.keys(checks).filter(key => checks[key]).forEach((key) => { temp.positions.push(key) })
-                                }} />
-                                {errors.positions && <div className="bg-white black px-1">{errors.positions}</div>}
-
-                                {quiz.situation !== "Opening" && <ScenarioOverlay title={"Vilains Positions"} scenarios={scenarios} />}
-                                {errors.scenarios && <div className="bg-white black px-1">{errors.scenarios}</div>}
-
-                                <label htmlFor="quiz_name" className="w-100">
-                                    <div>Quiz name :</div>
-                                    <input className="w-75" type="text" value={quiz.quizName} maxLength={200} placeholder={"Enter quiz name"}
-                                        onChange={(e) => { let temp = { ...quiz }; temp.quizName = e.target.value; setQuiz(temp); }} />
-                                    {errors.name && <div className="bg-white black px-1 w-50 mx-auto mt-2">{errors.name}</div>}
-                                </label>
 
                                 {waitCreate ? <div>Please wait</div> :
                                     <input type="submit" className="btn btn-primary my-2" value="CREATE QUIZ" />}
@@ -200,7 +215,7 @@ export const Home = () => {
                                     <div className={`col-2 bi ${sortType === 7 ? "bi-caret-up-fill" : sortType === 8 ? "bi-caret-down-fill" : ""} px-1`}
                                         onClick={() => setSortType(sortType === 7 ? 8 : 7)}> Hero </div>
                                     <div className={`col-2 bi ${sortType === 9 ? "bi-caret-up-fill" : sortType === 10 ? "bi-caret-down-fill" : ""} px-1`}
-                                        onClick={() => setSortType(sortType === 9 ? 10 : 9)}> Adversity </div>
+                                        onClick={() => setSortType(sortType === 9 ? 10 : 9)}> Villain </div>
                                     <div className={`col-1  bi ${sortType === 1 ? "bi-caret-up-fill" : sortType === 2 ? "bi-caret-down-fill" : ""} px-1`}
                                         onClick={() => setSortType(sortType === 1 ? 2 : 1)}> Number </div>
                                     <div className={`col-1 bi ${sortType === 3 ? "bi-caret-up-fill" : sortType === 4 ? "bi-caret-down-fill" : ""} px-1`}
@@ -217,10 +232,11 @@ export const Home = () => {
                                             <div className="col-1 d-inline-flex flex-column align-items-center justify-content-center">{index + 1}</div>
                                             <div className="col-3 d-inline-flex flex-column align-items-center justify-content-center">  {x.quizName}</div>
                                             <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.situation}</div>
-                                            <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.positions.map((el) => <div key={el}>{el}</div>)}</div>
+                                            <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.positions.length === 6 ? "All" : x.positions.length === 1 ? x.positions[0] : "Var"}</div>
                                             <div className="col-2 d-inline-flex flex-column align-items-center justify-content-center">  {x.scenarios.map((el) => <div key={el}>{el}</div>)}</div>
                                             <div className="col-1 d-inline-flex align-items-center justify-content-center">  {x.nbrQuestion} </div>
-                                            <div className="col-1 d-inline-flex align-items-center justify-content-center">  [{x.difficultyMin}-{x.difficultyMax}] </div>                                   </div>)
+                                            <div className="col-1 d-inline-flex align-items-center justify-content-center">  [{x.difficultyMin}-{x.difficultyMax}] </div>
+                                        </div>)
                                     })}
                                 </div>
                             </div>}
