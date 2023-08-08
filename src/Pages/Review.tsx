@@ -4,8 +4,9 @@ import { Revue_t } from "../types/types";
 import { ReviewContext } from "../context/QuizContext";
 import { ScatterChart, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, Legend, Scatter, ResponsiveContainer } from 'recharts';
 import { Header } from "./Header";
+import { Link } from "react-router-dom";
 
-const VALUE = {
+const VALUE_BACK = {
     A: 1,
     K: 2,
     Q: 3,
@@ -35,8 +36,8 @@ export const ActionInfChoice: { color: string, abreviation: string, value: numbe
     ]
 
 function HtoRC(hand_in: string) {
-    let row = Object.entries(VALUE).find(([key,]) => { return key === hand_in[0] })[1],
-        col = Object.entries(VALUE).find(([key,]) => { return key === hand_in[1] })[1];
+    let row = Object.entries(VALUE_BACK).find(([key,]) => { return key === hand_in[0] })[1],
+        col = Object.entries(VALUE_BACK).find(([key,]) => { return key === hand_in[1] })[1];
 
     if (hand_in.length === 3 && hand_in[2] === 'o')
         [row, col] = [col, row];
@@ -202,25 +203,37 @@ const CreateBar = ({ revues }) => {
 
     })
 
-    return (<div className="h-100 mx-4">
-        <div className="row gx-5 h-50" >
-            <div className="col-6 my-2">
+    let userRC = Math.max(1, userAnswer.R + userAnswer.C),
+        correctRC = Math.max(1, correctAnswer.R + correctAnswer.C)
+
+    return (<div className="h-100 mx-4 my-2">
+        <div className="row gx-5 h-75" >
+            <div className="col-4">
                 Your stats
-                {Object.entries(userAnswer).map(([category, number]) => { return number > 0 && <div key={`user-${category}`} className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 100 / userTotal}%` }}>{category} ({Math.round(number * 100 / userTotal)}%)</div> })}
+                {Object.entries(userAnswer).map(([category, number]) => { return number > 0 && <div key={`user-${category}`} className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 90 / userTotal}%` }}>{category} ({Math.round(number * 100 / userTotal)}%)</div> })}
             </div>
-            <div className="col-6 my-2">
-                Solutions
-                {Object.entries(correctAnswer).map(([category, number]) => { return number > 0 && <div key={`solution-${category}`} className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 100 / totalCorrect}%` }}>{category} ({Math.round(number * 100 / totalCorrect)}%)</div> })}
+            <div className="col-4">
+                Correct Stats
+                {Object.entries(correctAnswer).map(([category, number]) => { return number > 0 && <div key={`solution-${category}`} className={`bg-${ActionInfChoice.find(x => x.abreviation === category).color} bar`} style={{ height: `${number * 90 / totalCorrect}%` }}>{category} ({Math.round(number * 100 / totalCorrect)}%)</div> })}
             </div>
 
         </div>
-        <div className="h-25 my-4">
-            <h4>Hand Played: {Math.round((userAnswer.R + userAnswer.C) / userTotal * 100)}%</h4>
-            <h4>Hand raised: {Math.round(userAnswer.R / userTotal * 100)}%</h4>
-            <h4>Correct Answer: {Math.round(rightAnswer / total * 100)}%</h4>
-            <h4>Tightness: {Math.round((userAnswer.R + userAnswer.C) / (correctAnswer.R + correctAnswer.C) / total * 100)}%</h4>
-            <h4>Passiveness: {Math.round(userAnswer.R / correctAnswer.R * 100)}%</h4>
-            <h4></h4>
+        <div className="h-25">
+            <div className="row gy-2">
+                <h5 className="col">Hand Played: {Math.round(userRC / userTotal * 100)}%</h5>
+                <h5 className="col">Hand raised: {Math.round(userAnswer.R / userTotal * 100)}%</h5>
+            </div>
+            <div className="row">
+                <h5 className="col">Tightness: {Math.round(userAnswer.F / correctAnswer.F * 100)}%</h5>
+                <h5 className="col"> {
+                    correctAnswer.C !== 0 ?
+                        "Passiveness: " + Math.round(userAnswer.C / (userRC) * (correctRC) / correctAnswer.C * 100)
+                        : "Agressiveness: " + Math.round(userAnswer.R / (userRC) * (correctRC) / correctAnswer.R * 100)}%
+                </h5>
+            </div>
+            <h5>Correct Answer: {rightAnswer}/{total} ({Math.round(rightAnswer / total * 100)}%)</h5>
+
+            <Link to="/home" className="btn btn-primary">Return home</Link>
         </div>
     </div>)
 }
@@ -234,7 +247,7 @@ export const Review = () => {
             <div className="col-9 mx-2 bg-subMenu px-2">
                 {informations.map(revue => <CreateRangeChart revue={revue} />)}
             </div>
-            <div className="col-3 bg-subMenu" style={{ minHeight: "20vh" }}>
+            <div className="col-3 bg-subMenu" style={{ minHeight: "90vh", maxHeight: "90vh" }}>
                 <CreateBar revues={informations} />
             </div>
         </div>

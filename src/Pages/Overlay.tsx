@@ -6,7 +6,7 @@ import { QuizContext } from '../context/QuizContext';
  * @param  {{ title: string, labels: string[], set }} info - information need to create the overlay, title of the overlay, labels of the checks button, and the function when their check
  * @returns {ReactElement} - return the overlay 
  */
-export const Overlay = (info: { title: string, labels: string[], set }) => {
+export const SituationOverlay = (info: { title: string, labels: string[], set }) => {
     const [show, setShow] = useState<boolean>(false);
     const [checks, setChecks] = useState<Object>({})
     const [quiz, setQuiz] = useContext(QuizContext);
@@ -23,15 +23,16 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
     }, [setChecks]);
 
     const Checkbox = ({ legend, value, quiz }) => {
-        return (<div><input type='checkbox' value={legend} checked={value} onChange={() => {
+        const func = () => {
             const tempChecks = { ...checks };
-            if (!(quiz.situation === "Opening" && checks["Opening"] === undefined))
-                Object.keys(tempChecks).forEach(k => {
-                    tempChecks[k] = false;
-                });
+            Object.keys(tempChecks).forEach(k => {
+                tempChecks[k] = false;
+            });
 
             tempChecks[legend] = !tempChecks[legend]; setChecks(tempChecks);
-        }} /> {legend} </div>);
+        }
+
+        return (<div onClick={func}><input type='checkbox' value={legend} checked={value} onChange={() => { }} /> {legend} </div>);
     }
 
     useEffect(() => {
@@ -48,9 +49,62 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
                 <h5>{info.title}</h5>
                 <p className={`h5 bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
             </div>
+        </div>
+        {show && <div className='content d-flex flex-wrap w-100 flex-overlay justify-content-center'>
+            {Object.entries(checks).map(([k, v]) => <Checkbox key={'checkbox_' + k} legend={k} value={v} quiz={quiz} />)}
+        </div>}
+    </div>);
+}
+
+/**
+ * Function to create an overlay with checkbox
+ * @param  {{ title: string, labels: string[], set }} info - information need to create the overlay, title of the overlay, labels of the checks button, and the function when their check
+ * @returns {ReactElement} - return the overlay 
+ */
+export const PositionOverlay = (info: { title: string, labels: string[], set }) => {
+    const [show, setShow] = useState<boolean>(false);
+    const [checks, setChecks] = useState<Object>({})
+    const [quiz, setQuiz] = useContext(QuizContext);
+
+    useEffect(() => {
+        let temp = {};
+        for (const key of info.labels) {
+            temp[key] = false;
+        }
+        setChecks(temp);
+    }, [setChecks, info.labels]);
+
+    const Checkbox = ({ legend, value, quiz }) => {
+        const func = () => {
+            const tempChecks = { ...checks };
+            if (quiz.situation !== "Opening")
+                Object.keys(tempChecks).forEach(k => {
+                    tempChecks[k] = false;
+                });
+
+            tempChecks[legend] = !tempChecks[legend]; setChecks(tempChecks);
+        }
+
+        return (<div onClick={func}><input type='checkbox' value={legend} checked={value} onChange={() => { }} /> {legend} </div>);
+    }
+
+    useEffect(() => {
+        setQuiz(prevQuiz => {
+            const temp = { ...prevQuiz };
+            info.set(checks, temp);
+            return temp;
+        });
+    }, [checks, setQuiz]);
+
+    return (<div className="overlay py-2 align-self-start px-2 w-100">
+        <div className='header d-flex '>
+            <div className="d-flex" onClick={() => { setShow(!show) }}>
+                <h5>{info.title}</h5>
+                <p className={`h5 bi bi-arrow-right-circle-fill teal mx-2 ${show && "rotate90"}`} />
+            </div>
             {show && <div className='mx-auto'>
-                {false && <button type="button" className='btn btn-primary me-2 py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }}  >Select all</button>}
-                {false && <button type="button" className='btn btn-primary py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button>}
+                {quiz.situation === "Opening" && <button type="button" className='btn btn-primary me-2 py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = true); setChecks(temp); }}  >Select all</button>}
+                {quiz.situation === "Opening" && <button type="button" className='btn btn-primary py-1' onClick={() => { let temp = { ...checks }; Object.keys(checks).forEach(k => temp[k] = false); setChecks(temp); }} >Deselect all</button>}
             </div>}
 
         </div>
@@ -59,6 +113,8 @@ export const Overlay = (info: { title: string, labels: string[], set }) => {
         </div>}
     </div>);
 }
+
+
 
 
 /**

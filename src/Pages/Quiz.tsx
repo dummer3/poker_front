@@ -7,71 +7,11 @@ import { ValueWithChip } from './Chip'
 import { QuestionsContext, QuizContext, ReviewContext } from '../context/QuizContext'
 import { Question_t, Revue_t } from '../types/types'
 import { Header } from './Header'
-import { POSITION } from './ScenarioRepresentation'
 import { ScenarioRepresentation } from './ScenarioRepresentation'
 import { useNavigate } from 'react-router-dom'
 import { ExplanationOverlay, ActionInfChoice } from './ExplanationOverlay'
 import { GetExplanation } from "./ApiGoogle";
-
-/**
- * Value enum for the value of a card.
- * @readonly
- * @private
- * @enum {number}
- */
-
-export enum VALUE {
-    _2 = 1,
-    _3 = 2,
-    _4 = 3,
-    _5 = 4,
-    _6 = 5,
-    _7 = 6,
-    _8 = 7,
-    _9 = 8,
-    T = 9,
-    J = 10,
-    Q = 11,
-    K = 12,
-    A = 0
-}
-
-/**
- * Value enum for the suit of a card.
- * @readonly
- * @private
- * @enum {number}
- */
-enum SUIT {
-    CLUB = 0,
-    DIAMOND = 1,
-    HEART = 2,
-    SPADES = 3
-}
-
-
-/**
- * Action enum for the basic user action.
- * @readonly
- * @enum {string}
- */
-enum ACTION {
-    FOLD = "FOLD",
-    CALL = "CALL",
-    RAISE = "RAISE",
-}
-
-/**
- * Multiple_action enum for complex user action.
- * @readonly
- * @enum {string} 
- */
-enum MULTIPLE_ACTION {
-
-    "CALL/FOLD" = "CALL/FOLD",
-    "RAISE/CALL" = "RAISE/CALL",
-    "RAISE/FOLD" = "RAISE/FOLD"
-}
+import { VALUE, SUIT, ACTION, MULTIPLE_ACTION, POSITION } from './Enum'
 
 /**
  * players position on the table
@@ -185,7 +125,6 @@ export const TestAnswer = (action: any, question: Question_t, setScore, setAnswe
         else
             revues.push({ situation: question.situation, scenario: question.scenario, answers: [{ hand: question.hand.toString(), answer: ActionInfChoice.find(x => x.action === action).abreviation, solution: question.Correct }] })
         return revues;
-
     });
 
     setAnswered(true);
@@ -272,12 +211,13 @@ export const Player = (card: HTMLImageElement, x: string, y: string, position: n
             }
         });
 
-        if (situation === "4-Bet" || situation === "5-Bet") {
+        if (situation === "4Bet" || situation === "5Bet")
             ind === position ? setAction(ACTION.RAISE) : setAction(ACTION.FOLD);
-        }
         else {
-            if ((POSITION[heroPosition as unknown as keyof typeof POSITION] + 4) % 6 < (position + 4) % 6)
+            if ((heroPosition?.valueOf() + 4) % 6 < (position + 4) % 6)
                 setAction(ACTION.CALL);
+            else if (situation === "Opening")
+                setAction(ACTION.FOLD);
             else
                 setAction(ind === position ? ACTION.RAISE : ACTION.FOLD);
         }
@@ -361,6 +301,8 @@ export const Quiz = () => {
         window.addEventListener('keydown', keyDownEvent);
         questions.forEach(question => { if (question.situation === "Opening") question.scenarios = question.positions; })
         console.log(review);
+
+        return () => { window.removeEventListener('keydown', keyDownEvent); }
     }, [])
 
     useEffect(() => {
@@ -413,8 +355,8 @@ export const Quiz = () => {
 
     useEffect(() => {
         if (question)
-            setButton([(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} setRevue={setReview} />),
-            (Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton action={action} question={question} setScore={setScore} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} setRevue={setReview} />)]);
+            setButton([(Object.keys(ACTION) as Array<keyof typeof ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton key={`quiz-${quiz.name}-action-${action}`} action={action} question={question} setScore={setScore} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} setRevue={setReview} />),
+            (Object.keys(MULTIPLE_ACTION) as Array<keyof typeof MULTIPLE_ACTION>).filter(x => !(parseInt(x.toString()) > 0)).map(action => <ActiontoButton key={`action-${action}`} action={action} question={question} setScore={setScore} nbrQuestion={nbrQuestion} setAnswered={setAnswered} answered={answered} setRevue={setReview} />)]);
     }, [question, answered, nbrQuestion, score, setReview]);
 
     useEffect(() => {
@@ -428,7 +370,7 @@ export const Quiz = () => {
     const [chart, setChart] = useState([]);
 
     return (
-        <div className="quiz d-flex flex-column">
+        <div key={`quiz_${quiz.name}`} className="quiz d-flex flex-column">
             <Header title={question?.scenario.substring(question?.scenario.indexOf(" "), question?.scenario.length)}
                 leftText={question?.situation === "OP" ? "Opening" : question?.situation}
                 leftSub={question?.position}
